@@ -18,5 +18,6 @@ print "<title>Sending Message</title>"
 print "</head>"
 print "<body>"
 print "<p>hello you chose station %s</p>" %station
+print "<?php echo 'WHAT THE FUCK' ?>"
 print "</body>"
 print "</html>"

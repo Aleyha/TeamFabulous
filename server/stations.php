@@ -1,19 +1,11 @@
 <?php
-//hello
+// hello
 session_start();
 
 if(!isset($_SESSION['name'])){
 		header('Location:login.php');
 }
-if(isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 30)){
-	session_unset();
-	session_destroy();
-	header('refresh:1;url=login.php');
-	?>
-		<script>window.alert("SESSION TIMEOUT")</script>
-	<?php
-}
-$_SESSION['LAST_ACTIVITY'] = time();
+
 // if(isset($_POST["station"])){
 // $_SESSION['in_use'] = $_POST["station"];
 // echo "is this working";
@@ -42,6 +34,7 @@ div.direction{
 </style>
 </head>
 <body>
+<meta http-equiv="refresh" content="300;" />
 <img src="fablab_image.jpg" alt="Fab Lab UTA" style="position: fixed">
 <div class=direction>
 <form id=drct action="stations.py" method="post" target="_blank">
@@ -50,12 +43,21 @@ div.direction{
 	<input type="submit" value="Submit">
 </form>
 <h3><a href="logout.php">Click here to log out</a></h3>
-<!-- <form id=logout method="GET">
-<button name="lgt" type="submit" value="HTML">Logout</button>
-</form> -->
-<!-- <?php
-	
-?> -->
+<form id=logout method="GET">
+<!-- <button name="lgt" type="submit" value="HTML">Logout</button> -->
+</form>
+<?php
+	if(isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 10)){
+	session_unset();
+	session_destroy();
+	header('Location:login.php');
+	?>
+		<script>location.reload(true); window.alert("SESSION TIMEOUT"); </script>
+	<?php
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+?> 
+
 </div>
 </body>
 </html>
