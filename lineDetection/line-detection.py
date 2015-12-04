@@ -9,8 +9,8 @@ import sys
 import pyglet
 import pygame
 import os
-
-global position
+import time
+import traceback
 
 global imagename 
 imagename= "rightTurn3.png"
@@ -27,7 +27,8 @@ global Rthreshold
 global Gthreshold
 global Bthreshold
 global im
-global neighorRange = 10
+global neighborRange
+neighborRange = 10
 
 Rthreshold = 100
 Gthreshold = 50
@@ -37,11 +38,12 @@ global height
 global width
 global tr
 
-
+global saveDirectory
+saveDirectory = "/home/fart/TeamFabulous/lineDetection/"
 
 def tesseract(image):
     text = tr.ocr_image(image)
-    print text
+    #print text
     print "TESSERACT FINISHED"
     words = text.split()
     for word in words:
@@ -51,7 +53,7 @@ def tesseract(image):
 def findStation():
     ret, frame = cap.read()
     cv2.waitKey(1)
-    imgName = "tessPic.png"
+    imgName = saveDirectory + "tessPic.png"
     cv2.imwrite(imgName,frame)
     tessImg = cv2.imread(imgName,1)
     tessImg = Image.fromarray(tessImg, 'RGB')
@@ -161,7 +163,7 @@ def openimage():
     lower_red = np.array([0,100,100])
     upper_red = np.array([10,255,255])
 
-    im = cv2.imread("pic.png",1) # open the Image file
+    im = cv2.imread(saveDirectory + "pic.png",1) # open the Image file
     # convert to HSV and mask to find blue and red
     hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
     # Threshold the HSV image to get only red colors
@@ -175,34 +177,36 @@ def openimage():
 
 def find_direction(x1,y1,x2,y2):
 	global im
-	# We will now draw a red cricle at the point where we have deteced a line
-	# draw = ImageDraw.Draw(im)
-	# # The circle will help us manually verify our algorithum
-	# cv2.imwrite("drawn.jpeg", im)
-	# drawnIm= cv2.imread("drawn.jpeg")
+	'''
+	We will now draw a red cricle at the point where we have deteced a line
+	draw = ImageDraw.Draw(im)
+	# The circle will help us manually verify our algorithum
+	cv2.imwrite("drawn.jpeg", im)
+	drawnIm= cv2.imread("drawn.jpeg")
 			   
-	# cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
-	# cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
-	# cv2.imwrite("drawn.jpeg",drawnIm)
+	cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
+	cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
+	cv2.imwrite("drawn.jpeg",drawnIm)
 
-	# logic to see if line is turning right 
+	logic to see if line is turning right 
 
 	
-#	if ( x2 >= x1 +20):
-#		print "turn right*************"
-#		return 2
-#		#logic to see if line is turning left 
-#	else:
-#		if ( x2 < x1 -20):
-#			print "!!!!!!!!!!!!!turn left"
-#			return 3
-#		#logic to see if line straight        
-#		else:                
-#			print "go straight"
-#			return 1
+	if ( x2 >= x1 +20):
+		print "turn right*************"
+		return 2
+		#logic to see if line is turning left 
+	else:
+		if ( x2 < x1 -20):
+			print "!!!!!!!!!!!!!turn left"
+			return 3
+		#logic to see if line straight        
+		else:                
+			print "go straight"
+			return 1
+
+	'''
 
 	# returns 1 - 9, 1-4 is left, 5 is straight, 6-9 is right
-
 	xDiff = x2 - x1 # top x value - botom x value
 	yDiff = abs(y2 - y1)  # difference between top and bottom values
 	ratioYX = yDiff / float(width - 2 * neighborRange) # used to normalize ratio between width and height so that it seems like a 1:1 ratio (for easier mathing)
@@ -210,18 +214,18 @@ def find_direction(x1,y1,x2,y2):
 	normalizedTurn = int(rawTurn * 4.5) + 5
 	
 	#comment this next block out for performance, it prints out the calculated direction
-	turningAdjective = {0: "", 1: "slight", 2: "medium", 3: "heavy", 4: "max"}
-	turnDirection = {"left", "straight", "right"}
-	turningAdjectiveActual = abs(normalizedTurn - 5)
+	turnAdjective = {0: "", 1: "slight", 2: "medium", 3: "heavy", 4: "max"}
+	turnDirection = ["left", "straight", "right"]
+	turnAdjectiveActual = abs(normalizedTurn - 5)
 	if normalizedTurn > 5:
 		turnDirectionActual = 2
 	elif normalizedTurn < 5:
 		turnDirectionActual = 0
 	else:
 		turnDirectionActual = 1
-	print "%s %s" % (a, b)
+	print "%s %s" % (turnAdjective[turnAdjectiveActual], turnDirection[turnDirectionActual])
 
-	return  # normalizes -1 to 1 to -4.5 to 4.5, which gets cast to -4 to 4, which gets shifted to 1 to 9:   1 is full left, 9 is full right, 5 is straight
+	return normalizedTurn # normalizes -1 to 1 to -4.5 to 4.5, which gets cast to -4 to 4, which gets shifted to 1 to 9:   1 is full left, 9 is full right, 5 is straight
 				
 	
 
@@ -242,12 +246,13 @@ def processimage(motor_socket):
     while(True):
         ret, frame = cap.read()
         # Display the resulting frame
-	'''
+	
         cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q')  :
             break
-	'''
-        cv2.imwrite('pic.png',frame)
+        
+	
+        cv2.imwrite(saveDirectory + 'pic.png',frame)
         openimage()
 
         #look for red first
@@ -265,6 +270,8 @@ def processimage(motor_socket):
        # print "linestarted1", linestarted1 , "linestarted2" , linestarted2
         if linestarted1 > -1 and linestarted2 > -1:  
             currTurn = find_direction(linestarted1,y1,linestarted2,y2)
+            motor_socket.send_multipart([b'motor', str(currTurn)])
+            '''
             # print "currTurn = ", currTurn
             # print "prevTurn = ", prevTurn
             if currTurn == prevTurn:
@@ -278,83 +285,101 @@ def processimage(motor_socket):
                 motor_socket.send_multipart([b'motor', str(currTurn)])
                 turnCounter = 0
             # print "turnCounter = ", turnCounter
+            '''
+            
         else:
             print " Line NOT found"
  
-  
-global music
-music = False # if music is working  
-
-tr = Tesseract("/usr/local/share") # this is slow 
-
-# Prepare our socket to talk to the motor
-context = zmq.Context()
-motor_socket = context.socket(zmq.ROUTER)
-motor_socket.setsockopt(zmq.IDENTITY, b'line')
-motor_socket.connect('tcp://localhost:5559')
-
-# prepare socket that talks to the main program
-main_socket = context.socket(zmq.DEALER)
-main_socket.setsockopt(zmq.IDENTITY, b'line')
-main_socket.connect('tcp://localhost:5550')
 
 
-
+f = open(saveDirectory + "line_detection.txt", "w")
 
 try:
-    # loading music files with pygame!
-    pygame.mixer.init()
-
-    # setting up the noise when it finds a station
-    global found_noise 
-    found_noise = pygame.mixer.Sound('secret.wav')
-
-    player = pyglet.media.Player()
+  
+    global music
+    music = False # if music is working  
     
-    # looking in the music directory for music to queue
-    music_files = []
-    for files in os.listdir("/home/fart/Music"):
-        file = files.split(".")
-    # if music:
-        extension = file[1].lower() # in case file extension is uppercase
-        if extension == "wav":
-            music_files.append(files)
 
-    print music_files
-    # loading music from the music folder and queuing it up
-    for i in range(len(music_files)):
-        song = pyglet.media.load("/home/fart/Music/" + music_files[i])
-        player.queue(song)
 
-    music = True
-except:
-     print "error opening music..."
+    tr = Tesseract("/usr/local/share") # this is slow 
+
+    # Prepare our socket to talk to the motor
+    context = zmq.Context()
+    motor_socket = context.socket(zmq.ROUTER)
+    motor_socket.setsockopt(zmq.IDENTITY, b'line')
+    motor_socket.connect('tcp://localhost:5559')
+
+    # prepare socket that talks to the main program
+    main_socket = context.socket(zmq.DEALER)
+    main_socket.setsockopt(zmq.IDENTITY, b'line')
+    main_socket.connect('tcp://localhost:5550')
 
 
 
 
+    try:
+        # loading music files with pygame!
+        pygame.mixer.init()
 
-# clock = pygame.time.Clock()
-# clock.tick(10)
-# while pygame.mixer.music.get_busy():
-#     pygame.event.poll()
-#     clock.tick(10)
+        # setting up the noise when it finds a station
+        global found_noise 
+        found_noise = pygame.mixer.Sound('secret.wav')
 
-while True:
-    print "waiting for message..."
-    msg = main_socket.recv_multipart()
-    station = msg[0]
-    print "running line detection with station " + station
+        player = pyglet.media.Player()
+        
+        # looking in the music directory for music to queue
+        music_files = []
+        for files in os.listdir("/home/fart/Music"):
+            file = files.split(".")
+        # if music:
+            extension = file[1].lower() # in case file extension is uppercase
+            if extension == "wav":
+                music_files.append(files)
+
+        print music_files
+        # loading music from the music folder and queuing it up
+        for i in range(len(music_files)):
+            song = pyglet.media.load("/home/fart/Music/" + music_files[i])
+            player.queue(song)
+
+        music = True
+    except:
+         f.write("error opening music...")
+
+
+
+
+
+    # clock = pygame.time.Clock()
+    # clock.tick(10)
+    # while pygame.mixer.music.get_busy():
+    #     pygame.event.poll()
+    #     clock.tick(10)
+
+    while True:
+        print "waiting for message..."
+        msg = main_socket.recv_multipart()
+        station = msg[0]
+        print "running line detection with station " + station
+
+        if music:
+        	player.play()
+        processimage(motor_socket)
+        cap.release()
+        cv2.destroyAllWindows()
+        main_socket.send_multipart([b"finished"])
+
+        
+    motor_socket.close()
+    main_socket.close()
+    #pygame.mixer.quit()
+
+
+except Exception as e:
+    trace =  traceback.format_exc()
+    print trace
     
-    #station = raw_input("enter station: ")
-    if music:
-    	player.play()
-    processimage(motor_socket)
-    cap.release()
-    cv2.destroyAllWindows()
-    main_socket.send_multipart([b"finished"])
-
-    
-motor_socket.close()
-main_socket.close()
-#pygame.mixer.quit()
+    #traceback.print_stack(e)
+    f.write(trace)
+    f.close()
+    time.sleep(300)

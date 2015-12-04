@@ -10,42 +10,62 @@
 
 import zmq
 import pyglet
-
-song = pyglet.media.load("/home/fart/TeamFabulous/comms/R2D2a.wav")
-
-
-context = zmq.Context()
-
-# creating a socket for the line detection
-# and server to talk to
-socket = context.socket(zmq.ROUTER)
-socket.setsockopt(zmq.IDENTITY, b'main')
-socket.bind('tcp://*:5550')
+import traceback
+import time
 
 
-# Initialize poll set
-poller = zmq.Poller()
-poller.register(socket, zmq.POLLIN)
+try:
 
-song.play()
 
-line_detection_running= False
-while True:
-    print "recieving message"
+    music = False
 
-    msg = socket.recv_multipart()
-    print msg
-    if msg[0] == "server":
-        if not line_detection_running:
-            socket.send_multipart([b'server', b'bet'])
-            socket.send_multipart([b'line', msg[1]]) 
+    try:
+        song = pyglet.media.load("/home/fart/TeamFabulous/comms/R2D2a.wav")
+        music = True
+    except:
+        pass
 
-            line_detection_running = True
-    if msg[0] == "line":
-        print "assuming line is done..."
-        line_detection_running = False
+    context = zmq.Context()
+
+    # creating a socket for the line detection
+    # and server to talk to
+    socket = context.socket(zmq.ROUTER)
+    socket.setsockopt(zmq.IDENTITY, b'main')
+    socket.bind('tcp://*:5550')
+
+
+    # Initialize poll set
+    poller = zmq.Poller()
+    poller.register(socket, zmq.POLLIN)
+
+    if music:
+        song.play()
+
+    line_detection_running= False
+    while True:
+        print "recieving message"
+
+        msg = socket.recv_multipart()
+        print msg
+        if msg[0] == "server":
+            if not line_detection_running:
+                socket.send_multipart([b'server', b'bet'])
+                socket.send_multipart([b'line', msg[1]]) 
+
+                line_detection_running = True
+        if msg[0] == "line":
+            print "assuming line is done..."
+            line_detection_running = False
     
 
-  
 
-socket.close()
+    socket.close()
+
+except Exception as e:
+    trace =  traceback.format_exc()
+    print trace
+    f = open("/home/fart/TeamFabulous/comms/main_program.txt", "w")
+    #traceback.print_stack(e)
+    f.write(trace)
+    f.close()
+    time.sleep(300)

@@ -1,4 +1,8 @@
-python line_detection.py & echo $! >> run.pid
-python ivory.py & echo $! >> run.pid
-python ebony.py & echo $! >> run.pid
-python ivory.py & echo $! >> run.pid
+/etc/init.d/lighttpd restart
+pwd > pwd.txt
+python /home/fart/TeamFabulous/comms/main_program.py > output.txt
+#& echo $! >> run.pid
+python /home/fart/TeamFabulous/lineDetection/line-detection.py & echo $! >> run.pid
+python /home/fart/TeamFabulous/comms/motor.py & echo $! >> run.pid
+#testing only
+#python server_backend.py & echo $! >> run.pid
