@@ -6,7 +6,7 @@ from PIL import Image
 import threading
 
 global imagename 
-imagename= "pic"
+imagename= "rightTurn3.png"
 
 global Rthreshold
 global Gthreshold
@@ -42,21 +42,26 @@ def detect_line(start_x,y):
         global Rthreshold
         global Gthreshold
         global Bthreshold
+        foundBlue = False
         
-        for x in range (start_x,width-5):
+        for x in range (start_x,width):
              # We will extract r,g,b values of pixels at x, y to x,y+10
              r=[]
              g=[]
              b=[]
 
 
-             for i in range(-5, 5):
+             for i in range(0, 10):
                  b_value,g_value,r_value=(im[y+i,x])
                  r.append(r_value)
                  g.append(g_value)
                  b.append(b_value)
-                 if(mask[y+i,x] ==  255):
+                 # annotate_image(x,y+i,0,0)
+                 if(maskRed[y+i,x] ==  255):
                     print "found red"
+                 if(maskBlue[y+i,x] ==  255):
+                    foundBlue = True
+                    break
                                    
              
              Cr = int(np.mean(r))
@@ -65,24 +70,32 @@ def detect_line(start_x,y):
    
 
              # First condition for line detection
-             if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
+             if ((Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold )) or (foundBlue == True):
+             # if(foundBlue == True):
+                 foundBlue = False
                  #when in this if statement we will perfrom another check
                  #This time we will extract r,g,b values of pixels from x,y to x+10, y    
                  r=[]
                  g=[]
                  b=[]
-                 for i in range(-5, 5):
+                 for i in range(0, 10):
                     b_value,g_value,r_value=(im[y+i,x])
                     r.append(r_value)
                     g.append(g_value)
                     b.append(b_value)
+                    if(maskBlue[y+i,x] ==  255):
+                        print "foundblue"
+                        foundBlue = True
+                        break
+                    
              
                  Cr = int(np.mean(r))
                  Cg = int(np.mean(g))
                  Cb = int(np.mean(b))
 
                  #Second condition for line detection       
-                 if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
+                 if ((Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold )) or (foundBlue == True):
+                 # if(foundBlue == True):
                          #If this condition is true, we have detected a line
 
                          print "Line found " + str(x) +" , "+ str(y)
@@ -95,7 +108,8 @@ def openimage():
     global height
     global width
     global im
-    global mask
+    global maskRed
+    global maskBlue
 
     lower_green = np.array([50,100,100])
     upper_green = np.array([70,255,255])
@@ -105,13 +119,16 @@ def openimage():
     upper_red = np.array([10,255,255])
 
     im = cv2.imread("pic.png",1) # open the Image file
-    # im = cv2.imread('pic4.png',1)
+    # convert to HSV and mask to find blue and red
     hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
     # Threshold the HSV image to get only red colors
-    mask = cv2.inRange(hsv, lower_red, upper_red)
+    maskRed = cv2.inRange(hsv, lower_red, upper_red)
+    maskBlue = cv2.inRange(hsv, lower_blue, upper_blue)
 
     height, width, channels = im.shape # get height and width of image
     print width, height, channels
+
+
 
 def annotate_image(x1,y1,x2,y2):
             global im
@@ -123,7 +140,7 @@ def annotate_image(x1,y1,x2,y2):
             
                 
             cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
-            # cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
+            cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
             cv2.imwrite("drawn.jpeg",drawnIm)
             # im.save(imagename+".jpeg","JPEG")
 
@@ -153,7 +170,7 @@ def processimage():
     global width
     linestarted1 =-1
     linestarted2 =-1
-    x_start= 5
+    x_start= 10
     cap = cv2.VideoCapture(0)
     # cap = cv2.VideoCapture("lineVid.mov") 
     cap.set(3, 320)
