@@ -82,7 +82,7 @@ cv2.imwrite("output.png", frame)
 
 # threading objects
 tesseract_thread = threading.Thread(target=tesseract)
-station_finding_thread = threading.Thread(target=find_station, args=("save",))
+station_finding_thread = threading.Thread(target=find_station, args=("packet",))
 
 # start threads
 tesseract_thread.start()
