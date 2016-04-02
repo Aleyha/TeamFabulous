@@ -102,9 +102,9 @@ while(True):
     saving_thread.start()
     
     # Display the resulting frame
-    cv2.imshow('frame', frame)
-    if cv2.waitKey(1) & 0xFF == ord('q')  :
-        break
+#    cv2.imshow('frame', frame)
+#    if cv2.waitKey(1) & 0xFF == ord('q')  :
+ #       break
 
 
 cleanup()
@@ -112,7 +112,7 @@ tesseract_thread.join()
 station_finding_thread.join()
 # When everything is done, release the capture
 cap.release()
-cv2.destroyAllWindows()
+#cv2.destroyAllWindows()
 
 
     

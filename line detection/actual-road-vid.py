@@ -1,6 +1,8 @@
 import Image, ImageDraw, ImageFont
 import numpy as np
 import cv2 
+from time import sleep
+import serial
 
 global imagename 
 imagename= "pic"
@@ -61,13 +63,14 @@ def detect_line(start_x,y):
                          return (x)
                            
 
-def openimage():
+def openimage(frame):
     global imagename
     global pix
     global height
     global width
     global im
     im = Image.open(imagename +".png") # open the Image file
+    # im = Image.fromarray(frame)
     rgb_im = im.convert('RGB') #convert the image to RGB type
     width, height = rgb_im.size # get height and width of image
     pix=im.load()  # load all pixels of image in an list called "pix"
@@ -84,21 +87,25 @@ def annotate_image(x1,y1,x2,y2):
 
             # logic to see if line is turning right 
             if ( x2 >= x1 +20):
-                   print "turn right*************"
-                   draw.text( (width/2,height/2), "Turn Right")    
-                   im.save(imagename+".jpeg","JPEG")
+               print "turn right*************"
+               draw.text( (width/2,height/2), "Turn Right")    
+               im.save(imagename+".jpeg","JPEG")
                #logic to see if line is turning left 
+               return 2
             else:
                     if ( x2 < x1 -20):
                        draw.text( (width/2,height/2), "Turn Left", )        
                        im.save(imagename+".jpeg","JPEG")
                        print "!!!!!!!!!!!!!turn left"
+                       return 3
                    #logic to see if line straight        
                     #if ( roadstarted2 + 19 > roadstarted1 > roadstarted2 - 20 ):
-                    else:                 
-                           draw.text( (width/2,height/2), "Go Straight", )  
-                           im.save(imagename+".jpeg","JPEG")
-                           print "go straight"
+                    else:                
+                       draw.text( (width/2,height/2), "Go Straight", )  
+                       im.save(imagename+".jpeg","JPEG")
+                       print "go straight"
+                       return 1
+
     
 def processimage():
         global height
@@ -107,15 +114,16 @@ def processimage():
         linestarted2 =-1
         x_start= 10
         cap = cv2.VideoCapture(0)
-        cap.set(3,320);
-        cap.set(4,240);
+        # cap = cv2.VideoCapture("lineVid.mov") 
+        # ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
+        counter = 32 # Below 32 everything in ASCII is gibberish
         while(True):
             ret, frame = cap.read()
             cv2.imshow('frame',frame)
             cv2.imwrite('pic.png',frame)
             imagename = "pic"
-            openimage()
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            openimage(frame)
+            if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
             y1=int (height-(height/4)) # Height 1 to start looking for line
             print "y1 start "+ str(y1)
@@ -125,9 +133,14 @@ def processimage():
             linestarted2 = detect_line(x_start , y2)
             if linestarted1 > -1 and linestarted2 > -1:
                 
-                annotate_image(linestarted1,y1,linestarted2,y2)
+                counter = annotate_image(linestarted1,y1,linestarted2,y2)
+                # ser.write(str(counter).encode()) # Convert the decimal number to ASCII then send it to the Arduino
+                # print (ser.readline()) # Read the newest output from the Arduino
+                # sleep(.1) # Delay for one tenth of a second
+                print counter
             else:
                 print " Line NOT found"
-       
+	cap.release()
+ 		      
 
 processimage()
