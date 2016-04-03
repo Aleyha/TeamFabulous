@@ -114,6 +114,8 @@ def processimage():
         linestarted2 =-1
         x_start= 10
         cap = cv2.VideoCapture(0)
+        cap.set(3, 320)
+        cap.set(4, 240)
         # cap = cv2.VideoCapture("lineVid.mov") 
         # ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
         counter = 32 # Below 32 everything in ASCII is gibberish
