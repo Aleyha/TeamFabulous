@@ -69,8 +69,8 @@ def openimage(frame):
     global height
     global width
     global im
-    # im = Image.open(imagename +".png") # open the Image file
-    im = Image.fromarray(frame)
+    im = Image.open(imagename +".png") # open the Image file
+    # im = Image.fromarray(frame)
     rgb_im = im.convert('RGB') #convert the image to RGB type
     width, height = rgb_im.size # get height and width of image
     pix=im.load()  # load all pixels of image in an list called "pix"
@@ -114,8 +114,6 @@ def processimage():
         linestarted2 =-1
         x_start= 10
         cap = cv2.VideoCapture(0)
-        cap.set(3,320);
-        cap.set(4,240);
         # cap = cv2.VideoCapture("lineVid.mov") 
         # ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
         counter = 32 # Below 32 everything in ASCII is gibberish
