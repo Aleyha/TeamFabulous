@@ -43,6 +43,7 @@ void loop()
       //drive the motor
       roboclaw.ForwardM1(address, 64);
       //roboclaw.ForwardM2(address, 64);
+      roboclaw.ForwardM2(address, 64);
       //Serial.println("driving motor");
       
     }
@@ -50,7 +51,7 @@ void loop()
     {
       Serial.println("stop motor");
       roboclaw.ForwardM1(address, 0);
-      //roboclaw.ForwardM2(address, 0);
+      roboclaw.ForwardM2(address, 0);
       //Serial.println("stopping motor");
     }
     else if(inByte == '2')
@@ -58,14 +59,14 @@ void loop()
       // right
       Serial.println("turning right");
       roboclaw.ForwardBackwardM1(address,96); //start Motor1 forward at half speed
-      //roboclaw.ForwardBackwardM2(address,32); //start Motor2 backward at half speed
+      roboclaw.ForwardBackwardM2(address,32); //start Motor2 backward at half speed
       
     }
     else if(inByte == '3')
     {
       Serial.println("turn left");
       roboclaw.ForwardBackwardM1(address,32);
-      //roboclaw.ForwardBackwardM2(address,96);
+      roboclaw.ForwardBackwardM2(address,96);
     }
     
   }
