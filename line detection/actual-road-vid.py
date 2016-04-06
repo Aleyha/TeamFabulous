@@ -15,6 +15,13 @@ Rthreshold = 100
 Gthreshold = 50
 Bthreshold = 180
 
+global RthresholdG
+global GthresholdG
+global BthresholdG
+RthresholdG = 95
+GthresholdG = 140
+BthresholdG = 90
+
 global pix
 
 global height
@@ -39,11 +46,14 @@ def detect_line(start_x,y):
              Cg = int(np.mean(g))
              Cb = int(np.mean(b))
              
+             #check for green
+             if(Cr < RthresholdG) and (Cg > GthresholdG) and (Cb < Bthreshold ):
+                print "found green"
+                exit()
              # First condition for line detection
              if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
                  #when in this if statement we will perfrom another check
                  #This time we will extract r,g,b values of pixels from x,y to x+10, y    
-                 
                  r=[]
                  g=[]
                  b=[]
@@ -56,14 +66,16 @@ def detect_line(start_x,y):
                  Cr = int(np.mean(r))
                  Cg = int(np.mean(g))
                  Cb = int(np.mean(b))
+
                  #Second condition for line detection       
                  if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
                          #If this condition is true, we have detected a line
+
                          print "Line found " + str(x) +" , "+ str(y)
                          return (x)
                            
 
-def openimage(frame):
+def openimage():
     global imagename
     global pix
     global height
@@ -83,7 +95,7 @@ def annotate_image(x1,y1,x2,y2):
             # The circle will help us manually verify our algorithum
             draw.ellipse((x1, y1, x1+10, y1+10), fill=(255, 0, 0)) # Draw a circle    
             draw.ellipse((x2, y2, x2+10, y2+10), fill=(255, 0, 0)) # Draw a circle    
-            im.save(imagename+".jpeg","JPEG")
+            im.save(imagename+"2.jpeg","JPEG")
 
             # logic to see if line is turning right 
             if ( x2 >= x1 +20):
@@ -114,9 +126,10 @@ def processimage():
         linestarted2 =-1
         x_start= 10
         cap = cv2.VideoCapture(0)
+        # cap = cv2.VideoCapture("lineVid.mov") 
         cap.set(3, 320)
         cap.set(4, 240)
-        # cap = cv2.VideoCapture("lineVid.mov") 
+
         # ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
         counter = 32 # Below 32 everything in ASCII is gibberish
         while(True):
@@ -124,9 +137,10 @@ def processimage():
             cv2.imshow('frame',frame)
             cv2.imwrite('pic.png',frame)
             imagename = "pic"
-            openimage(frame)
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                break
+            # openimage(frame)
+            openimage()
+            # if cv2.waitKey(10) & 0xFF == ord('q'):
+            #     break
             y1=int (height-(height/4)) # Height 1 to start looking for line
             print "y1 start "+ str(y1)
             linestarted1 = detect_line(x_start , y1)
@@ -142,7 +156,7 @@ def processimage():
                 print counter
             else:
                 print " Line NOT found"
-	cap.release()
+	# cap.release()
  		      
 
 processimage()
