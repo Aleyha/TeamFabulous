@@ -1,0 +1,10 @@
+tesserapt
+- git clone https://github.com/gregjurman/tesserwrap
+- cd tesserwrap-master
+- python setup.py install
+- cd tests 
+- run the test_tesseract.py
+- if it works, you gucci
+
+python tesseract
+- cant because I can't find stupid liblept3

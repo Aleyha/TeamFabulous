@@ -4,11 +4,12 @@ import subprocess
 import threading
 import sys
 import os
+from tesserwrap import Tesseract
+from PIL import Image 
 
-# note to self: maybe there should be more connections if you save
-# tesseract's output to a file
 semaphore = threading.BoundedSemaphore();
-#outfile_semaphore = threading.BoundedSemaphore();
+text = ""
+
 
 def cleanup():
     print "CLEANING UP!"
@@ -40,13 +41,21 @@ this function just calls tesseract forever using a system call
 it will stop if output.png is deleted
 '''
 def tesseract():
-    global semaphore   
+    global semaphore
+    global text
+
     while(True):
         if not os.path.exists("./output.png"):
             break
 
         semaphore.acquire()
+        img = Image.open("output.png")
+        tr = Tesseract("/usr/local/share")
+        text = tr.ocr_image(img)
+
+        '''
         subprocess.call(["tesseract", "output.png","out"])
+        '''
         semaphore.release()
 
 
@@ -55,18 +64,15 @@ reads tesseract output file to
 find the station name we are looking for.
 '''
 def find_station(station_name):
-    # global semaphore
+    
+    global text
     while(True):
-        if not os.path.isfile("./out.txt"):
-            break
-        f = open("out.txt", "r")
-        for line in f:
-            words = line.split()
-            for word in words:
-                if word.lower() == station_name:
-                    print "STATION FOUND!!"
-                    cleanup();
-                    break
+        words = text.split()
+        for word in words:
+            if word.lower() == station_name:
+                print "STATION FOUND!!"
+                cleanup();
+                break
         f.close()
 
 # creating a video capture object
@@ -86,7 +92,7 @@ station_finding_thread = threading.Thread(target=find_station, args=("packet",))
 
 # start threads
 tesseract_thread.start()
-station_finding_thread.start()
+#station_finding_thread.start()
 
 
 while(True):
@@ -102,9 +108,9 @@ while(True):
     saving_thread.start()
     
     # Display the resulting frame
-#    cv2.imshow('frame', frame)
-#    if cv2.waitKey(1) & 0xFF == ord('q')  :
- #       break
+    cv2.imshow('frame', frame)
+    if cv2.waitKey(1) & 0xFF == ord('q')  :
+        break
 
 
 cleanup()
@@ -112,7 +118,7 @@ tesseract_thread.join()
 station_finding_thread.join()
 # When everything is done, release the capture
 cap.release()
-#cv2.destroyAllWindows()
+cv2.destroyAllWindows()
 
 
     
