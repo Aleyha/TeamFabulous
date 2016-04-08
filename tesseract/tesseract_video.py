@@ -8,7 +8,7 @@ from tesserwrap import Tesseract
 from PIL import Image 
 
 semaphore = threading.BoundedSemaphore();
-text = ""
+global text = ""
 
 
 def cleanup():
@@ -42,7 +42,6 @@ it will stop if output.png is deleted
 '''
 def tesseract():
     global semaphore
-    global text
 
     while(True):
         if not os.path.exists("./output.png"):
@@ -52,7 +51,7 @@ def tesseract():
         img = Image.open("output.png")
         tr = Tesseract("/usr/local/share")
         text = tr.ocr_image(img)
-
+        print text
         '''
         subprocess.call(["tesseract", "output.png","out"])
         '''
@@ -65,11 +64,11 @@ find the station name we are looking for.
 '''
 def find_station(station_name):
     
-    global text
     while(True):
+
         words = text.split()
         for word in words:
-            if word.lower() == station_name:
+            if word == station_name:
                 print "STATION FOUND!!"
                 cleanup();
                 break
@@ -77,7 +76,8 @@ def find_station(station_name):
 
 # creating a video capture object
 cap = cv2.VideoCapture(0)
-
+cap.set(3, 320)
+cap.set(4, 240)
 # creating output file??
 f = open("out.txt", "w")
 f.close()
@@ -88,7 +88,7 @@ cv2.imwrite("output.png", frame)
 
 # threading objects
 tesseract_thread = threading.Thread(target=tesseract)
-station_finding_thread = threading.Thread(target=find_station, args=("packet",))
+station_finding_thread = threading.Thread(target=find_station, args=("FART",))
 
 # start threads
 tesseract_thread.start()

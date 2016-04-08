@@ -1,8 +1,9 @@
 import Image, ImageDraw, ImageFont
 import numpy as np
 import cv2 
-from time import sleep
-import serial
+from tesserwrap import Tesseract
+from PIL import Image 
+import threading
 
 global imagename 
 imagename= "pic"
@@ -18,19 +19,32 @@ Bthreshold = 180
 global RthresholdG
 global GthresholdG
 global BthresholdG
-RthresholdG = 95
-GthresholdG = 140
-BthresholdG = 90
+RthresholdG = 130
+GthresholdG = 180
+BthresholdG = 70
 
 global pix
 
 global height
 global width
+global tr
+tr = Tesseract("/usr/local/share") # this is slow
+
+
+
+def tesseract():
+    text = tr.ocr_image(im)
+    print text
+    print "TESSERACT THREAD FINISHED"
+
+tesseract_thread = threading.Thread(target=tesseract)
 
 def detect_line(start_x,y):
         global Rthreshold
         global Gthreshold
         global Bthreshold
+        
+
         for x in range (start_x,width):
              # We will extract r,g,b values of pixels at x, y to x,y+10
              r=[]
@@ -47,9 +61,13 @@ def detect_line(start_x,y):
              Cb = int(np.mean(b))
              
              #check for green
-             if(Cr < RthresholdG) and (Cg > GthresholdG) and (Cb < Bthreshold ):
+             if(Cr < RthresholdG) and (Cg > GthresholdG) and (Cb < BthresholdG ):
                 print "found green"
+                #tesseract_thread.start(); # this is broken
                 exit()
+                #adding code here for tesseract stuff
+   
+
              # First condition for line detection
              if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
                  #when in this if statement we will perfrom another check
@@ -71,7 +89,7 @@ def detect_line(start_x,y):
                  if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
                          #If this condition is true, we have detected a line
 
-                         print "Line found " + str(x) +" , "+ str(y)
+                         #print "Line found " + str(x) +" , "+ str(y)
                          return (x)
                            
 
@@ -120,43 +138,44 @@ def annotate_image(x1,y1,x2,y2):
 
     
 def processimage():
-        global height
-        global width
-        linestarted1 =-1
-        linestarted2 =-1
-        x_start= 10
-        cap = cv2.VideoCapture(0)
-        # cap = cv2.VideoCapture("lineVid.mov") 
-        cap.set(3, 320)
-        cap.set(4, 240)
+    global height
+    global width
+    linestarted1 =-1
+    linestarted2 =-1
+    x_start= 10
+    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture("lineVid.mov") 
+    cap.set(3, 320)
+    cap.set(4, 240)
 
-        # ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
-        counter = 32 # Below 32 everything in ASCII is gibberish
-        while(True):
-            ret, frame = cap.read()
-            cv2.imshow('frame',frame)
-            cv2.imwrite('pic.png',frame)
-            imagename = "pic"
-            # openimage(frame)
-            openimage()
-            # if cv2.waitKey(10) & 0xFF == ord('q'):
-            #     break
-            y1=int (height-(height/4)) # Height 1 to start looking for line
-            print "y1 start "+ str(y1)
-            linestarted1 = detect_line(x_start , y1)
-            y2=int (height-(height*(0.75)))
-            print "y2 start "+ str(y2)
-            linestarted2 = detect_line(x_start , y2)
-            if linestarted1 > -1 and linestarted2 > -1:
-                
-                counter = annotate_image(linestarted1,y1,linestarted2,y2)
-                # ser.write(str(counter).encode()) # Convert the decimal number to ASCII then send it to the Arduino
-                # print (ser.readline()) # Read the newest output from the Arduino
-                # sleep(.1) # Delay for one tenth of a second
-                print counter
-            else:
-                print " Line NOT found"
-	# cap.release()
+    # ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
+    counter = 32 # Below 32 everything in ASCII is gibberish
+    while(True):
+        ret, frame = cap.read()
+        # Display the resulting frame
+        cv2.imshow('frame', frame)
+        if cv2.waitKey(10) & 0xFF == ord('q')  :
+            break
+        cv2.imwrite('pic.png',frame)
+
+        imagename = "pic"
+        # openimage(frame)
+        openimage()
+
+        y1=int (height-(height/4)) # Height 1 to start looking for line
+        #print "y1 start "+ str(y1)
+        linestarted1 = detect_line(x_start , y1)
+        y2=int (height-(height*(0.75)))
+        #print "y2 start "+ str(y2)
+        linestarted2 = detect_line(x_start , y2)
+        if linestarted1 > -1 and linestarted2 > -1:
+            
+            counter = annotate_image(linestarted1,y1,linestarted2,y2)
+            print counter
+        else:
+            print " Line NOT found"
+    cap.release()
+    cv2.destroyAllWindows()
  		      
 
 processimage()
