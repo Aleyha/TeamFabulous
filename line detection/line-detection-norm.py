@@ -6,7 +6,7 @@ from PIL import Image
 import threading
 
 global imagename 
-imagename= "rightTurn"
+imagename= "pic"
 
 global Rthreshold
 global Gthreshold
@@ -24,7 +24,6 @@ GthresholdG = 180
 BthresholdG = 70
 
 global pix
-
 global height
 global width
 global tr
@@ -43,32 +42,26 @@ def detect_line(start_x,y):
         global Rthreshold
         global Gthreshold
         global Bthreshold
-        # print start_x, width
-        # print len(im)
+        
         for x in range (start_x,width):
              # We will extract r,g,b values of pixels at x, y to x,y+10
              r=[]
              g=[]
              b=[]
 
-             for i in range(1, 10):
-                 b_value,g_value,r_value=(im[y+i,x])
-                 print b_value, g_value, r_value
 
+             for i in range(0, 10):
+                 b_value,g_value,r_value=(im[y+i,x])
                  r.append(r_value)
                  g.append(g_value)
                  b.append(b_value)
+                 if(mask[y+i,x] ==  255):
+                    print "found red"
+                                   
              
              Cr = int(np.mean(r))
              Cg = int(np.mean(g))
              Cb = int(np.mean(b))
-             
-             #check for green
-             if(Cr < RthresholdG) and (Cg > GthresholdG) and (Cb < BthresholdG ):
-                print "found green"
-                #tesseract_thread.start(); # this is broken
-                exit()
-                #adding code here for tesseract stuff
    
 
              # First condition for line detection
@@ -102,24 +95,37 @@ def openimage():
     global height
     global width
     global im
-    # im = Image.open(imagename +".png") # open the Image file
-    im = cv2.imread('rightTurn.png',1)
-    
+    global mask
+
+    lower_green = np.array([50,100,100])
+    upper_green = np.array([70,255,255])
+    lower_blue = np.array([110,100,100])
+    upper_blue = np.array([130,255,255])
+    lower_red = np.array([0,100,100])
+    upper_red = np.array([10,255,255])
+
+    im = cv2.imread("pic.png",1) # open the Image file
+    # im = cv2.imread('pic4.png',1)
+
+    hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
+    # Threshold the HSV image to get only red colors
+    mask = cv2.inRange(hsv, lower_red, upper_red)
+
     height, width, channels = im.shape # get height and width of image
     print width, height, channels
-    # print im[10,180]
 
 def annotate_image(x1,y1,x2,y2):
             global im
             # We will now draw a red cricle at the point where we have deteced a line
             # draw = ImageDraw.Draw(im)
             # # The circle will help us manually verify our algorithum
-            cv2.circle(im, (x1,y1),5,(0,0,255),-1 )
-            cv2.circle(im, (x2,y2),5,(0,0,255),-1 )
-            cv2.imshow("image", im)
-            cv2.waitKey(0)
-            # draw.ellipse((x1, y1, x1+10, y1+10), fill=(255, 0, 0)) # Draw a circle    
-            # draw.ellipse((x2, y2, x2+10, y2+10), fill=(255, 0, 0)) # Draw a circle    
+            cv2.imwrite("drawn.jpeg", im)
+            drawnIm= cv2.imread("drawn.jpeg")
+            
+                
+            cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
+            cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
+            cv2.imwrite("drawn.jpeg",drawnIm)
             # im.save(imagename+".jpeg","JPEG")
 
             # logic to see if line is turning right 
@@ -136,7 +142,6 @@ def annotate_image(x1,y1,x2,y2):
                        print "!!!!!!!!!!!!!turn left"
                        return 3
                    #logic to see if line straight        
-                    # if ( roadstarted2 + 19 > roadstarted1 > roadstarted2 - 20 ):
                     else:                
                        # draw.text( (width/2,height/2), "Go Straight", )  
                        # im.save(imagename+".jpeg","JPEG")
@@ -150,43 +155,37 @@ def processimage():
     linestarted1 =-1
     linestarted2 =-1
     x_start= 10
-    # cap = cv2.VideoCapture(0)
-    # # cap = cv2.VideoCapture("lineVid.mov") 
-    # cap.set(3, 320)
-    # cap.set(4, 240)
+    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture("lineVid.mov") 
+    cap.set(3, 320)
+    cap.set(4, 240)
 
     # ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
     counter = 32 # Below 32 everything in ASCII is gibberish
-    # while(True):
-        # ret, frame = cap.read()
+    while(True):
+        ret, frame = cap.read()
         # Display the resulting frame
-        # cv2.imshow('frame', frame)
-        # if cv2.waitKey(10) & 0xFF == ord('q')  :
-        #     break
-        # cv2.imwrite('pic.png',frame)
+        cv2.imshow('frame', frame)
+        if cv2.waitKey(10) & 0xFF == ord('q')  :
+            break
+        cv2.imwrite('pic.png',frame)
+        openimage()
 
-    imagename = "rightTurn"
-    # openimage(frame)
-    openimage()
-    # cv2.imshow("image",im)
-    # cv2.waitKey(0)
-
-
-    y1=int (height-(height/4)) # Height 1 to start looking for line
-    # print "y1 start "+ str(y1)
-    linestarted1 = detect_line(x_start , y1)
-    y2=int (height-(height*(0.75)))
-    # print "y2 start "+ str(y2)
-    linestarted2 = detect_line(x_start , y2)
-    print "linestarted1", linestarted1 , "linestarted2" , linestarted2
-    if linestarted1 > -1 and linestarted2 > -1:
-        
-        counter = annotate_image(linestarted1,y1,linestarted2,y2)
-        print counter
-    else:
-        print " Line NOT found"
-    # cap.release()
-    # cv2.destroyAllWindows()
+        y1=int (height-(height/4)) # Height 1 to start looking for line
+        print "y1 start "+ str(y1)
+        linestarted1 = detect_line(x_start , y1)
+        y2=int (height-(height*(0.75)))
+        print "y2 start "+ str(y2)
+        linestarted2 = detect_line(x_start , y2)
+        print "linestarted1", linestarted1 , "linestarted2" , linestarted2
+        if linestarted1 > -1 and linestarted2 > -1:
+            
+            counter = annotate_image(linestarted1,y1,linestarted2,y2)
+            print counter
+        else:
+            print " Line NOT found"
+    cap.release()
+    cv2.destroyAllWindows()
 		      
 
 processimage()
