@@ -1,13 +1,26 @@
+
+# DEALER is the worker
+# DEALER receives a command to execute
+# Sends back the status of motors...?
+
+import zmq
 from time import sleep
 import serial
-ser = serial.Serial('COM4', 9600) # Establish the connection on a specific port
-counter = 32 # Below 32 everything in ASCII is gibberish
+
+
+context = zmq.Context()
+socket = context.socket(zmq.DEALER)
+socket.setsockopt(zmq.IDENTITY, b'motor')
+socket.bind("tcp://*:5559")
+
+
+ser = serial.Serial('COM8', 9600) # Establish the connection on a specific port
+
 while True:
-    #counter +=1
-    counter = input('Enter 1 or 0: ')
-    ser.write(str(counter).encode()) # Convert the decimal number to ASCII then send it to the Arduino
-    print (ser.readline()) # Read the newest output from the Arduino
-    sleep(.1) # Delay for one tenth of a second
-    #if counter == 255:
-    #    counter = 32
+    counter = socket.recv()
+    print "recieved: " + counter
+    ser.write(str(counter)) # Convert the decimal number to ASCII then send it to the Arduino
+    #socket.send_multipart([b'line',ser.readline()]) # Read the newest output from the Arduino
+    #sleep(.1) # Delay for one tenth of a second
+
             

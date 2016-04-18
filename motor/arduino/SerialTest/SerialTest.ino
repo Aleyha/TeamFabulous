@@ -36,20 +36,19 @@ void loop()
   if(Serial.available()) // only send data back if data has been sent
   {
     char inByte = Serial.read(); // read the incoming data
-    Serial.println(inByte); // send the data back in a new line so that it is not all one long line
+    //Serial.println(inByte); // send the data back in a new line so that it is not all one long line
     if(inByte == '1')
     {
-      Serial.println("drive motor");
+      Serial.print("drive motor");
       //drive the motor
-      roboclaw.ForwardM1(address, 64);
-      //roboclaw.ForwardM2(address, 64);
-      roboclaw.ForwardM2(address, 64);
+      roboclaw.ForwardM1(address, 30);
+      roboclaw.ForwardM2(address, 30);
       //Serial.println("driving motor");
       
     }
     else if (inByte == '0')
     {
-      Serial.println("stop motor");
+      Serial.print("stop motor");
       roboclaw.ForwardM1(address, 0);
       roboclaw.ForwardM2(address, 0);
       //Serial.println("stopping motor");
@@ -57,7 +56,7 @@ void loop()
     else if(inByte == '2')
     {
       // right
-      Serial.println("turning right");
+      Serial.print("turning right");
       roboclaw.ForwardBackwardM1(address,96); //start Motor1 forward at half speed
       roboclaw.ForwardBackwardM2(address,32); //start Motor2 backward at half speed
       
