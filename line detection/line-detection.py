@@ -61,24 +61,10 @@ def detect_line(start_x,y):
                  b.append(b_value)
              
              Cr = int(np.mean(r))
+             
              Cg = int(np.mean(g))
              Cb = int(np.mean(b))
 
-              #check for red
-             if(Cr > RthresholdR) and (Cg < GthresholdR) and (Cb > BthresholdR ):
-                print "found red"
-                print x
-                #tesseract_thread.start(); # this is broken
-                # return(x)
-                exit()
-             
-             #check for green
-             # if(Cr < RthresholdG) and (Cg > GthresholdG) and (Cb < BthresholdG ):
-             #    print "found green"
-             #    #tesseract_thread.start(); # this is broken
-             #    exit()
-                #adding code here for tesseract stuff
-   
 
              # First condition for line detection
              if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
@@ -101,7 +87,7 @@ def detect_line(start_x,y):
                  if (Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold ):
                          #If this condition is true, we have detected a line
 
-                         #print "Line found " + str(x) +" , "+ str(y)
+                         # print "Line found " + str(x) +" , "+ str(y)
                          return (x)
                            
 
@@ -174,13 +160,15 @@ def processimage():
         # openimage(frame)
         openimage()
 
-        y1=int (height-(height/4)) # Height 1 to start looking for line
+        y1=int (height-11) # Height 1 to start looking for line
         #print "y1 start "+ str(y1)
         linestarted1 = detect_line(x_start , y1)
         # linestarted1 = 250
-        y2=int (height-(height*(0.75)))
+        y2=int (0)
         #print "y2 start "+ str(y2)
         linestarted2 = detect_line(x_start , y2)
+
+        print " line1 = ", linestarted1, "line2 = ", linestarted2
         if linestarted1 > -1 and linestarted2 > -1:
             
             counter = annotate_image(linestarted1,y1,linestarted2,y2)
