@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>F.A.R.T. Login</title>
+<style>
+img{
+	position:absolute;
+	top:5%;
+	left:40%;
+
+}
+div.login{
+	position:absolute;
+	top:40%;
+	left:25%;
+}
+</style>
+<script type="text/javascript" src="login.js"></script>
+</head>
+<body>
+<img src="http://library.uta.edu/sites/default/files/styles/medium/public/FabLab_Final%20_Logos_480x480.jpg?itok=hdt5AUey" alt="Fab Lab UTA" style="position: fixed">
+<div class=login>
+<form name ="loginForm" action="login.js" method="post">
+Username:<input type="text" name="uname">
+Password:<input type="password" name="password">
+<button type="button" name="submit" onclick="validateLogin()">Submit</button>
+</form>
+</div>
+
+
+</body>
+</html>
