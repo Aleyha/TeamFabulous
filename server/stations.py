@@ -16,6 +16,6 @@ print "<head>"
 print "<title>Dropdown Box - Sixth CGI Program</title>"
 print "</head>"
 print "<body>"
-print "<h2> Selected Subject is %s</h2>" % subject
+print "<h2> Selected Station is %s</h2>" % station
 print "</body>"
 print "</html>"
