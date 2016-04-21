@@ -19,19 +19,19 @@ div.direction{
 </head>
 <body>
 
-<img src="http://library.uta.edu/sites/default/files/styles/medium/public/FabLab_Final%20_Logos_480x480.jpg?itok=hdt5AUey" alt="Fab Lab UTA" style="position: fixed">
+<img src="fablab_image.jpg" alt="Fab Lab UTA" style="position: fixed">
 <div class=direction>
-<form id=drct action="/cgi-bin/stations.py" method="post">
-Stations: 
-<select name='dropdown'>
-	<option value="Krusty">Krusty</option>
-	<option value="Dewey">Dewey</option>
-	<option value="Adweeb">Adweeb</option>
-	<option value="Khabeir">Khabeir</option>
-	<option value="Crayon">Crayon</option>
-	<option value="FART">FART</option>
-</select>
-<button type="button" name="submit">Submit</button>
+<form id=drct action="stations.py" method="post" target="_blank">
+	Stations: 
+	<select name='dropdown'>
+		<option value="Krusty">Krusty</option>
+		<option value="Dewey">Dewey</option>
+		<option value="Adweeb">Adweeb</option>
+		<option value="Khabeir">Khabeir</option>
+		<option value="Crayon">Crayon</option>
+		<option value="FART">FART</option>
+	</select>
+	<input type="submit" value="submit">
 </form>
 </div>
 </body>

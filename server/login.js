@@ -6,6 +6,7 @@ function validateLogin(){
 	console.log(pass);
 	if(user == "UTAfab" && pass == "password"){
 		alert("Access Granted");
+		window.location = "stations.html";
 		return null;
 	}
 	else{
