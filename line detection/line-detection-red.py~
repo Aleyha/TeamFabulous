@@ -154,17 +154,6 @@ def annotate_image(x1,y1,x2,y2):
             # logic to see if line is turning right 
             if ( x2 >= x1 +20):
                print "turn right*************"
-=======
-            # im.save(imagename+".jpeg","JPEG")
-            drawnIm= cv2.imread("drawn.jpeg")
-            # logic to see if line is turning right 
-            if ( x2 >= x1 +20):
-               print "turn right*************"
-               cv2.putText(drawnIm, "turn right", (width/2, height/2),font,4,(255,255,255),2,cv2.LINE_AA )
-               # draw.text( (width/2,height/2), "Turn Right")    
-               # im.save(imagename+".jpeg","JPEG")
-               #logic to see if line is turning left 
->>>>>>> 8472f10b30459e5dac91cfb1a9039c0045056dc8
                return 2
                #logic to see if line is turning left 
             else:
@@ -174,12 +163,6 @@ def annotate_image(x1,y1,x2,y2):
                        return 3
                    #logic to see if line straight        
                     else:                
-<<<<<<< HEAD
-=======
-                       # draw.text( (width/2,height/2), "Go Straight", )  
-                       # im.save(imagename+".jpeg","JPEG")
-                       cv2.putText(drawnIm, "go straight", (width/2, height/2),font,4,(255,255,255),2,cv2.LINE_AA )
->>>>>>> 8472f10b30459e5dac91cfb1a9039c0045056dc8
                        print "go straight"
                        return 1
 

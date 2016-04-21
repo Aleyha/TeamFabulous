@@ -149,8 +149,7 @@ def annotate_image(x1,y1,x2,y2):
             cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
             cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
             cv2.imwrite("drawn.jpeg",drawnIm)
-<<<<<<< HEAD
-
+            
             # logic to see if line is turning right 
             if ( x2 >= x1 +20):
                print "turn right*************"
