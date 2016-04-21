@@ -9,7 +9,7 @@ global imagename
 imagename= "rightTurn3.png"
 
 global station 
-station = "FART"
+station = "DEW"
 global Rthreshold
 global Gthreshold
 global Bthreshold
@@ -56,19 +56,20 @@ def detect_line(start_x,y):
                 #look for red. If found, take 5 pictures and run tesseract() on them to see if correct station was reached
                  if(maskRed[y+i,x] ==  255):
                     print "found red"
-                    for f in range(0,5):
-                        ret, frame = cap.read()
-                        cv2.waitKey(100)
-                        imgName = 'tessPic' + str(f+1) +".png"
-                        cv2.imwrite(imgName,frame)
-                        tessImg = cv2.imread(imgName,1)
-                        tessImg = Image.fromarray(tessImg, 'RGB')
-                        stationFound = tesseract(tessImg) 
-                        if stationFound == True:
-                            print "FOUND STATION!!"
-                            exit()
-                        else:
-                            break     
+                    
+                    ret, frame = cap.read()
+                    cv2.waitKey(100)
+                    #imgName = 'tessPic' + str(f+1) +".png"
+                    imgName = "tessPic.png"
+                    cv2.imwrite(imgName,frame)
+                    tessImg = cv2.imread(imgName,1)
+                    tessImg = Image.fromarray(tessImg, 'RGB')
+                    stationFound = tesseract(tessImg) 
+                    if stationFound == True:
+                        print "FOUND STATION!!"
+                        exit()
+                    else:
+                        break     
                  if(maskBlue[y+i,x] ==  255):
                     foundBlue = True
                     break
