@@ -8,6 +8,8 @@ import threading
 global imagename 
 imagename= "rightTurn3.png"
 
+global station 
+station = "REGIONAL"
 global Rthreshold
 global Gthreshold
 global Bthreshold
@@ -16,14 +18,6 @@ Rthreshold = 100
 Gthreshold = 50
 Bthreshold = 180
 
-global RthresholdG
-global GthresholdG
-global BthresholdG
-RthresholdG = 130
-GthresholdG = 180
-BthresholdG = 70
-
-global pix
 global height
 global width
 global tr
@@ -31,12 +25,15 @@ tr = Tesseract("/usr/local/share") # this is slow
 
 
 
-def tesseract():
-    text = tr.ocr_image(im)
+def tesseract(image):
+    text = tr.ocr_image(image)
     print text
     print "TESSERACT THREAD FINISHED"
+    words = text.split()
+    for word in words:
+            if word == station:
+                return True
 
-tesseract_thread = threading.Thread(target=tesseract)
 
 def detect_line(start_x,y):
         global Rthreshold
@@ -56,9 +53,21 @@ def detect_line(start_x,y):
                  r.append(r_value)
                  g.append(g_value)
                  b.append(b_value)
-                 # annotate_image(x,y+i,0,0)
+                #look for red. If found, take 5 pictures and run tesseract() on them to see if correct station was reached
                  if(maskRed[y+i,x] ==  255):
                     print "found red"
+                    for f in range(0,5):
+                        ret, frame = cap.read()
+                        cv2.waitKey(100)
+                        imgName = 'tessPic' + str(f+1) +".png"
+                        cv2.imwrite(imgName,frame)
+                        tessImg = cv2.imread(imgName,1)
+                        tessImg = Image.fromarray(tessImg, 'RGB')
+                        stationFound = tesseract(tessImg) 
+                        if stationFound == True:
+                            print "FOUND STATION!!"
+                            break
+                    exit()     
                  if(maskBlue[y+i,x] ==  255):
                     foundBlue = True
                     break
@@ -71,7 +80,6 @@ def detect_line(start_x,y):
 
              # First condition for line detection
              if ((Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold )) or (foundBlue == True):
-             # if(foundBlue == True):
                  foundBlue = False
                  #when in this if statement we will perfrom another check
                  #This time we will extract r,g,b values of pixels from x,y to x+10, y    
@@ -95,7 +103,6 @@ def detect_line(start_x,y):
 
                  #Second condition for line detection       
                  if ((Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold )) or (foundBlue == True):
-                 # if(foundBlue == True):
                          #If this condition is true, we have detected a line
 
                          print "Line found " + str(x) +" , "+ str(y)
@@ -137,30 +144,22 @@ def annotate_image(x1,y1,x2,y2):
             # # The circle will help us manually verify our algorithum
             cv2.imwrite("drawn.jpeg", im)
             drawnIm= cv2.imread("drawn.jpeg")
-            
-                
+                       
             cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
             cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
             cv2.imwrite("drawn.jpeg",drawnIm)
-            # im.save(imagename+".jpeg","JPEG")
 
             # logic to see if line is turning right 
             if ( x2 >= x1 +20):
                print "turn right*************"
-               # draw.text( (width/2,height/2), "Turn Right")    
-               # im.save(imagename+".jpeg","JPEG")
-               #logic to see if line is turning left 
                return 2
+               #logic to see if line is turning left 
             else:
                     if ( x2 < x1 -20):
-                       # draw.text( (width/2,height/2), "Turn Left", )        
-                       # im.save(imagename+".jpeg","JPEG")
                        print "!!!!!!!!!!!!!turn left"
                        return 3
                    #logic to see if line straight        
                     else:                
-                       # draw.text( (width/2,height/2), "Go Straight", )  
-                       # im.save(imagename+".jpeg","JPEG")
                        print "go straight"
                        return 1
 
@@ -168,10 +167,11 @@ def annotate_image(x1,y1,x2,y2):
 def processimage():
     global height
     global width
+    global cap
     linestarted1 =-1
     linestarted2 =-1
     x_start= 10
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     # cap = cv2.VideoCapture("lineVid.mov") 
     cap.set(3, 320)
     cap.set(4, 240)
@@ -182,7 +182,7 @@ def processimage():
         ret, frame = cap.read()
         # Display the resulting frame
         cv2.imshow('frame', frame)
-        if cv2.waitKey(10) & 0xFF == ord('q')  :
+        if cv2.waitKey(100) & 0xFF == ord('q')  :
             break
         cv2.imwrite('pic.png',frame)
         openimage()

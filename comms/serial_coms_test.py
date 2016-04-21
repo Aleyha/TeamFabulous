@@ -14,7 +14,7 @@ socket.setsockopt(zmq.IDENTITY, b'motor')
 socket.bind("tcp://*:5559")
 
 
-ser = serial.Serial('COM8', 9600) # Establish the connection on a specific port
+ser = serial.Serial('/dev/ttyACM0', 9600) # Establish the connection on a specific port
 
 while True:
     counter = socket.recv()
