@@ -53,7 +53,7 @@ def detect_line(start_x,y):
                  r.append(r_value)
                  g.append(g_value)
                  b.append(b_value)
-                #look for blue and red in masked image
+                #look for red. If found, take 5 pictures and run tesseract() on them to see if correct station was reached
                  if(maskRed[y+i,x] ==  255):
                     print "found red"
                     for f in range(0,5):
@@ -142,24 +142,44 @@ def annotate_image(x1,y1,x2,y2):
             # We will now draw a red cricle at the point where we have deteced a line
             # draw = ImageDraw.Draw(im)
             # # The circle will help us manually verify our algorithum
+            font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.imwrite("drawn.jpeg", im)
             drawnIm= cv2.imread("drawn.jpeg")
                        
             cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
             cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
             cv2.imwrite("drawn.jpeg",drawnIm)
+<<<<<<< HEAD
 
             # logic to see if line is turning right 
             if ( x2 >= x1 +20):
                print "turn right*************"
+=======
+            # im.save(imagename+".jpeg","JPEG")
+            drawnIm= cv2.imread("drawn.jpeg")
+            # logic to see if line is turning right 
+            if ( x2 >= x1 +20):
+               print "turn right*************"
+               cv2.putText(drawnIm, "turn right", (width/2, height/2),font,4,(255,255,255),2,cv2.LINE_AA )
+               # draw.text( (width/2,height/2), "Turn Right")    
+               # im.save(imagename+".jpeg","JPEG")
+               #logic to see if line is turning left 
+>>>>>>> 8472f10b30459e5dac91cfb1a9039c0045056dc8
                return 2
                #logic to see if line is turning left 
             else:
                     if ( x2 < x1 -20):
                        print "!!!!!!!!!!!!!turn left"
+                       cv2.putText(drawnIm, "turn left", (width/2, height/2),font,4,(255,255,255),2,cv2.LINE_AA )
                        return 3
                    #logic to see if line straight        
                     else:                
+<<<<<<< HEAD
+=======
+                       # draw.text( (width/2,height/2), "Go Straight", )  
+                       # im.save(imagename+".jpeg","JPEG")
+                       cv2.putText(drawnIm, "go straight", (width/2, height/2),font,4,(255,255,255),2,cv2.LINE_AA )
+>>>>>>> 8472f10b30459e5dac91cfb1a9039c0045056dc8
                        print "go straight"
                        return 1
 
