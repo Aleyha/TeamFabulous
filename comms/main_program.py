@@ -7,11 +7,30 @@
 
  Tells the server backend if the line detection started and sends the station name to the main program
 '''
+
 import zmq
+import subprocess
 
 context = zmq.Context()
-socket = context.socket(zmq.ROUTER)
+
+# creating a socket for the line detection
+# and server to talk to
+socket = context.socket(zmq.DEALER)
 socket.setsockopt(zmq.IDENTITY, b'main')
-socket.connect('tcp://localhost:5559')
+socket.bind('tcp://*:5550')
 
 
+# Initialize poll set
+poller = zmq.Poller()
+poller.register(socket, zmq.POLLIN)
+
+while True:
+    print "recieving message"
+    ident, msg = socket.recv_multipart()
+    if ident == "server":
+        print "Started line detection"
+        subprocess.call(["python", "line_detection.py", msg])
+        print "finished"
+  
+
+socket.close()
