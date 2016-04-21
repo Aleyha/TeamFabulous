@@ -9,7 +9,7 @@ global imagename
 imagename= "rightTurn3.png"
 
 global station 
-station = "REGIONAL"
+station = "FART"
 global Rthreshold
 global Gthreshold
 global Bthreshold
@@ -28,7 +28,7 @@ tr = Tesseract("/usr/local/share") # this is slow
 def tesseract(image):
     text = tr.ocr_image(image)
     print text
-    print "TESSERACT THREAD FINISHED"
+    print "TESSERACT FINISHED"
     words = text.split()
     for word in words:
             if word == station:
@@ -66,8 +66,9 @@ def detect_line(start_x,y):
                         stationFound = tesseract(tessImg) 
                         if stationFound == True:
                             print "FOUND STATION!!"
-                            break
-                    exit()     
+                            exit()
+                        else:
+                            break     
                  if(maskBlue[y+i,x] ==  255):
                     foundBlue = True
                     break
@@ -92,7 +93,7 @@ def detect_line(start_x,y):
                     g.append(g_value)
                     b.append(b_value)
                     if(maskBlue[y+i,x] ==  255):
-                        print "foundblue"
+                        #print "foundblue"
                         foundBlue = True
                         break
                     
@@ -105,7 +106,7 @@ def detect_line(start_x,y):
                  if ((Cr < Rthreshold ) and (Cg > Gthreshold) and (Cb > Bthreshold )) or (foundBlue == True):
                          #If this condition is true, we have detected a line
 
-                         print "Line found " + str(x) +" , "+ str(y)
+                         #print "Line found " + str(x) +" , "+ str(y)
                          return (x)
                            
 
@@ -133,7 +134,7 @@ def openimage():
     maskBlue = cv2.inRange(hsv, lower_blue, upper_blue)
 
     height, width, channels = im.shape # get height and width of image
-    print width, height, channels
+    #print width, height, channels
 
 
 
@@ -190,16 +191,16 @@ def processimage():
         openimage()
 
         y1=int (height-(height/4)) # Height 1 to start looking for line
-        print "y1 start "+ str(y1)
+       # print "y1 start "+ str(y1)
         linestarted1 = detect_line(x_start , y1)
         y2=int (height-(height*(0.75)))
-        print "y2 start "+ str(y2)
+       # print "y2 start "+ str(y2)
         linestarted2 = detect_line(x_start , y2)
-        print "linestarted1", linestarted1 , "linestarted2" , linestarted2
+       # print "linestarted1", linestarted1 , "linestarted2" , linestarted2
         if linestarted1 > -1 and linestarted2 > -1:
             
             counter = annotate_image(linestarted1,y1,linestarted2,y2)
-            print counter
+            #print counter
         else:
             print " Line NOT found"
     cap.release()

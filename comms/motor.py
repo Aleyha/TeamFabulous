@@ -1,7 +1,7 @@
 
 # DEALER is the worker
 # DEALER receives a command to execute
-# Sends back the status of motors...?
+# motor connection
 
 import zmq
 from time import sleep
@@ -13,14 +13,15 @@ socket = context.socket(zmq.DEALER)
 socket.setsockopt(zmq.IDENTITY, b'motor')
 socket.bind("tcp://*:5559")
 
-
+#ser = serial.Serial('COM8', 9600) # Establish the connection on a specific port
 ser = serial.Serial('/dev/ttyACM0', 9600) # Establish the connection on a specific port
 
 while True:
-    counter = socket.recv()
-    print "recieved: " + counter
-    ser.write(str(counter)) # Convert the decimal number to ASCII then send it to the Arduino
+    ident, message = socket.recv_multipart()
+    print "recieved: " + message
+    #ser.write(str(message)) # Convert the decimal number to ASCII then send it to the Arduino
     #socket.send_multipart([b'line',ser.readline()]) # Read the newest output from the Arduino
     #sleep(.1) # Delay for one tenth of a second
 
             
+socket.close()
