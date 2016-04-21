@@ -1,4 +1,12 @@
-<!DOCTYPE html>
+<?php
+//hello
+session_start();
+
+if(!isset($_SESSION['name'])){
+		header('Location:login.php');
+}
+
+?> 
 <html>
 <head>
 <title>F.A.R.T. Stations</title>
@@ -18,7 +26,6 @@ div.direction{
 </style>
 </head>
 <body>
-
 <img src="fablab_image.jpg" alt="Fab Lab UTA" style="position: fixed">
 <div class=direction>
 <form id=drct action="stations.py" method="post" target="_blank">
@@ -32,8 +39,14 @@ div.direction{
 		<option value="FART">FART</option>
 	</select>
 	<input type="submit" value="Submit">
-	<input type="submit" value="Logout">
 </form>
+<h3><a href="logout.php">Click here to log out</a></h3>
+<!-- <form id=logout method="GET">
+<button name="lgt" type="submit" value="HTML">Logout</button>
+</form> -->
+<!-- <?php
+	
+?> -->
 </div>
 </body>
 </html>
