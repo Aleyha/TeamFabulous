@@ -1,0 +1,7 @@
+from tesserwrap import Tesseract
+from PIL import Image
+tr = Tesseract("/usr/local/share") # this is slow
+image = Image.open("test2.png")
+text = tr.ocr_image(im)
+print text
+print text.split()
