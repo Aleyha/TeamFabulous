@@ -28,9 +28,11 @@ while True:
     print "recieving message"
     ident, msg = socket.recv_multipart()
     if ident == "server":
-        print "Started line detection"
+        socket.send_multipart([b'server', b'bet'])
         subprocess.call(["python", "line_detection.py", msg])
-        print "finished"
+        socket.send_multipart([b'server', b'K'])
+     
+        
   
 
 socket.close()
