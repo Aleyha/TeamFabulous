@@ -29,7 +29,7 @@ while True:
     ident, msg = socket.recv_multipart()
     if ident == "server":
         socket.send_multipart([b'server', b'bet'])
-        subprocess.call(["python", "line_detection.py", msg])
+        subprocess.call(["python", "/home/christie/TeamFabulous/lineDetection/line-detection-red.py", msg])
         socket.send_multipart([b'server', b'K'])
      
         
