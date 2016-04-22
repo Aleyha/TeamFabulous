@@ -12,13 +12,13 @@ if(!isset($_SESSION['name'])){
 <title>F.A.R.T. Stations</title>
 <style>
 img{
-	position:absolute;
+	position:relative;
 	top:5%;
 	left:40%;
 
 }
 div.direction{
-	position:absolute;
+	position:relative;
 	top:40%;
 	left:42%;
 }

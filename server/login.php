@@ -21,14 +21,14 @@ if(isset($_POST["uname"]) AND isset($_POST["password"])){
 <title>F.A.R.T. Login</title>
 <style>
 img{
-	position:absolute;
+	position:relative;
 	top:5%;
 	left:40%;
 
 }
 div.login{
-	position:absolute;
-	top:35%;
+	position:relative;
+	top:40%;
 	left:30%;
 }
 </style>
