@@ -1,14 +1,13 @@
 <?php
-//this better fucking work
+//
 
 
 
 if(isset($_POST["uname"]) AND isset($_POST["password"])){
 	session_start();
 	$_SESSION['name'] = $_POST["uname"];
-	$_SESSION['pass'] = $_POST["password"];
 
-	if($_SESSION['name'] == 'UTAfab' AND $_SESSION['pass'] == 'password'){
+	if($_SESSION['name'] == 'UTAfab' AND $_POST['password'] == 'password'){
 		header('Location:stations.php');
 	}
 }
@@ -21,13 +20,12 @@ if(isset($_POST["uname"]) AND isset($_POST["password"])){
 <title>F.A.R.T. Login</title>
 <style>
 img{
-	position:relative;
 	top:5%;
 	left:40%;
 
 }
 div.login{
-	position:relative;
+    position:absolute;
 	top:40%;
 	left:30%;
 }
