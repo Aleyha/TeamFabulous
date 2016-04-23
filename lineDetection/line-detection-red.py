@@ -72,6 +72,7 @@ def detect_line(start_x,y):
                  if(maskRed[y+i,x] ==  255):
                     print "found red"
                     foundStation = findStation()
+                    #if the station is found, tell the motor to stop
                     if foundStation == True:
                         print "FOUND STATION!!"
                         motor_socket.send_multipart([b'motor', "0")
@@ -98,11 +99,11 @@ def detect_line(start_x,y):
                  g=[]
                  b=[]
                  for i in range(0, 10):
-                    b_value,g_value,r_value=(im[y+i,x])
+                    b_value,g_value,r_value=(im[y,x+i])
                     r.append(r_value)
                     g.append(g_value)
                     b.append(b_value)
-                    if(maskBlue[y+i,x] ==  255):
+                    if(maskBlue[y,x+i] ==  255):
                         #print "foundblue"
                         foundBlue = True
                         break

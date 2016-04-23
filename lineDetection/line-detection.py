@@ -14,8 +14,10 @@ global turnCounter # total count of turns
 turnCounter = 0
 global prevTurn 
 prevTurn = 0
+
 global station 
 station = sys.argv[1]
+# station = station.lower()
 global Rthreshold
 global Gthreshold
 global Bthreshold
@@ -49,6 +51,17 @@ def findStation():
     stationFound = tesseract(tessImg)
     return stationFound
 
+def findRed():
+    array = maskRed.tolist()
+    count = (sum(x.count(255) for x in array))
+    print "count is", count
+    if count >= 7000:
+       if findStation():
+        print "station found"
+        exit()
+    else:
+        return
+
 
 def detect_line(start_x,y):
         global Rthreshold
@@ -62,23 +75,22 @@ def detect_line(start_x,y):
              g=[]
              b=[]
 
-
              for i in range(0, 10):
                  b_value,g_value,r_value=(im[y+i,x])
                  r.append(r_value)
                  g.append(g_value)
                  b.append(b_value)
                 #look for red. If found, take 5 pictures and run tesseract() on them to see if correct station was reached
-                 if(maskRed[y+i,x] ==  255):
-                    print "found red"
-                    foundStation = findStation()
-                    if foundStation == True:
-                        print "FOUND STATION!!"
-                        # motor_socket.send_multipart([b'motor', 0)
+                 # if(maskRed[y+i,x] ==  255):
+                 #    print "found red"
+                    # foundStation = findStation()
+                    # if foundStation == True:
+                    #     print "FOUND STATION!!"
+                    #     # motor_socket.send_multipart([b'motor', str(0))
 
-                        exit()
-                    else:
-                        break     
+                    #     exit()
+                    # else:
+                    #     break     
                  if(maskBlue[y+i,x] ==  255):
                     foundBlue = True
                     break
@@ -198,6 +210,8 @@ def processimage(motor_socket):
         cv2.imwrite('pic.png',frame)
         openimage()
 
+        findRed()
+
         y1=int (height-(height/4)) # Height 1 to start looking for line
        # print "y1 start "+ str(y1)
         linestarted1 = detect_line(x_start , y1)
@@ -208,8 +222,8 @@ def processimage(motor_socket):
         if linestarted1 > -1 and linestarted2 > -1:
             
             currTurn = annotate_image(linestarted1,y1,linestarted2,y2)
-            print "currTurn = ", currTurn
-            print "prevTurn = ", prevTurn
+            # print "currTurn = ", currTurn
+            # print "prevTurn = ", prevTurn
             if currTurn == prevTurn:
                 turnCounter += 1
             else:
@@ -220,7 +234,7 @@ def processimage(motor_socket):
                 print "sending to motors"
                 motor_socket.send_multipart([b'motor', str(currTurn)])
                 turnCounter = 0
-            print "turnCounter = ", turnCounter
+            # print "turnCounter = ", turnCounter
         else:
             print " Line NOT found"
     cap.release()
