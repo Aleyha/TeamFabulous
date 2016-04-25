@@ -65,6 +65,11 @@ def findRed():
         print "station found"
         # position = pygame.mixer.music.get_pos()
         pygame.mixer.music.pause()
+        
+        # try this sometime
+        # found_noise = pygame.mixer.Sound('secret.wav')
+        # found.noise.play()
+        
         return True
     else:
         return False
