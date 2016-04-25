@@ -1,11 +1,12 @@
 import threading
+import time
 
 semaphore = threading.BoundedSemaphore()
 
 def read():
     global semaphore
     while (True):
-        #semaphore.acquire()
+        semaphore.acquire()
         f = open("test.txt", "r")
         print f.readline()
         f.close()
@@ -26,6 +27,12 @@ def write():
 thread1 = threading.Thread(target=read)
 thread2 = threading.Thread(target=write)
 
+thread1.daemon = True
+thread2.daemon = True
+
 thread1.start()
 thread2.start()
+
+while True:
+	time.sleep(1)
 
