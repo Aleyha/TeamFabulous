@@ -27,16 +27,11 @@ poller.register(socket, zmq.POLLIN)
 line_detection_running= False
 while True:
     print "recieving message"
+
     msg = socket.recv_multipart()
     print msg
     if msg[0] == "server":
         if not line_detection_running:
-            '''
-            the order of these messages matters
-            the first message sent will always go to the line detection code
-            the second message sent will always go to the server
-            '''
-            
             socket.send_multipart([b'server', b'bet'])
             socket.send_multipart([b'line', b'start']) 
 
@@ -45,6 +40,7 @@ while True:
         print "assuming line is done..."
         line_detection_running = False
     
+
   
 
 socket.close()

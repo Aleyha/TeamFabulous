@@ -6,6 +6,10 @@ from PIL import Image
 import threading
 import zmq
 import sys
+import pyglet
+import pygame
+
+global position
 
 global imagename 
 imagename= "rightTurn3.png"
@@ -16,7 +20,7 @@ global prevTurn
 prevTurn = 0
 
 global station 
-station = sys.argv[1]
+# station = sys.argv[1]
 # station = station.lower()
 global Rthreshold
 global Gthreshold
@@ -55,12 +59,15 @@ def findRed():
     array = maskRed.tolist()
     count = (sum(x.count(255) for x in array))
     print "count is", count
-    if count >= 7000:
+    if count >= 400:
+       # motor_socket.send_multipart([b'motor', str(0))
        if findStation():
         print "station found"
-        exit()
+        # position = pygame.mixer.music.get_pos()
+        pygame.mixer.music.pause()
+        return True
     else:
-        return
+        return False
 
 
 def detect_line(start_x,y):
@@ -196,11 +203,12 @@ def processimage(motor_socket):
     linestarted1 =-1
     linestarted2 =-1
     x_start= 10
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     cap.set(3, 320)
     cap.set(4, 240)
     prevTurn = 0
 
+    
     while(True):
         ret, frame = cap.read()
         # Display the resulting frame
@@ -210,8 +218,14 @@ def processimage(motor_socket):
         cv2.imwrite('pic.png',frame)
         openimage()
 
-        findRed()
+        #look for red first
+        foundStation = findRed()
+        if foundStation:
+            return
+        else:
+            pygame.mixer.music.unpause()
 
+        #if red isn't found, start blue line detection
         y1=int (height-(height/4)) # Height 1 to start looking for line
        # print "y1 start "+ str(y1)
         linestarted1 = detect_line(x_start , y1)
@@ -219,8 +233,7 @@ def processimage(motor_socket):
        # print "y2 start "+ str(y2)
         linestarted2 = detect_line(x_start , y2)
        # print "linestarted1", linestarted1 , "linestarted2" , linestarted2
-        if linestarted1 > -1 and linestarted2 > -1:
-            
+        if linestarted1 > -1 and linestarted2 > -1:  
             currTurn = annotate_image(linestarted1,y1,linestarted2,y2)
             # print "currTurn = ", currTurn
             # print "prevTurn = ", prevTurn
@@ -237,8 +250,7 @@ def processimage(motor_socket):
             # print "turnCounter = ", turnCounter
         else:
             print " Line NOT found"
-    cap.release()
-    cv2.destroyAllWindows()
+    
 
 # Prepare our socket to talk to the motor
 context = zmq.Context()
@@ -250,10 +262,35 @@ motor_socket.connect('tcp://localhost:5559')
 # main_socket = context.socket(zmq.DEALER)
 # main_socket.setsockopt(zmq.IDENTITY, b'line')
 # main_socket.connect('tcp://localhost:5550')
- 
 
-		      
+# song = pyglet.media.load('onedance.wav')
+# player = pyglet.media.Player()
+# player.queue(song)
 
-processimage(motor_socket)
+pygame.mixer.init()
+# pygame.display.set_mode((200,100))
+pygame.mixer.music.load("onedance.wav")
+position= 0
+pygame.mixer.music.play()
+pygame.mixer.music.pause()
+# pygame.mixer.music.set_pos(position)
+# pygame.mixer.music.play(0)
 
+# clock = pygame.time.Clock()
+# clock.tick(10)
+# while pygame.mixer.music.get_busy():
+#     pygame.event.poll()
+#     clock.tick(10)
+
+# while True:
+#     msg = main_socket.recv_multipart()
+while True:
+    station = raw_input("enter station: ")
+    # player.play()
+    # pygame.mixer.music.set_pos(position)
+    pygame.mixer.music.unpause()
+    processimage(motor_socket)
+    cap.release()
+    cv2.destroyAllWindows()
+    
 motor_socket.close()

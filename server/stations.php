@@ -25,7 +25,7 @@ img{
 
 }
 div.direction{
-	position:relative;
+	position:absolute;
 	top:40%;
 	left:35%;
 }
