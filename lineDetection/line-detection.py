@@ -7,6 +7,9 @@ import threading
 import zmq
 import sys
 import pyglet
+import pygame
+
+global position
 
 global imagename 
 imagename= "rightTurn3.png"
@@ -17,7 +20,7 @@ global prevTurn
 prevTurn = 0
 
 global station 
-station = sys.argv[1]
+# station = sys.argv[1]
 # station = station.lower()
 global Rthreshold
 global Gthreshold
@@ -60,7 +63,8 @@ def findRed():
        # motor_socket.send_multipart([b'motor', str(0))
        if findStation():
         print "station found"
-        player.pause()
+        # position = pygame.mixer.music.get_pos()
+        pygame.mixer.music.pause()
         return True
     else:
         return False
@@ -199,7 +203,7 @@ def processimage(motor_socket):
     linestarted1 =-1
     linestarted2 =-1
     x_start= 10
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     cap.set(3, 320)
     cap.set(4, 240)
     prevTurn = 0
@@ -218,6 +222,8 @@ def processimage(motor_socket):
         foundStation = findRed()
         if foundStation:
             return
+        else:
+            pygame.mixer.music.unpause()
 
         #if red isn't found, start blue line detection
         y1=int (height-(height/4)) # Height 1 to start looking for line
@@ -257,15 +263,32 @@ motor_socket.connect('tcp://localhost:5559')
 # main_socket.setsockopt(zmq.IDENTITY, b'line')
 # main_socket.connect('tcp://localhost:5550')
 
-song = pyglet.media.load('coldplay.wav')
-player = pyglet.media.Player()
-player.queue(song)
+# song = pyglet.media.load('onedance.wav')
+# player = pyglet.media.Player()
+# player.queue(song)
+
+pygame.mixer.init()
+# pygame.display.set_mode((200,100))
+pygame.mixer.music.load("onedance.wav")
+position= 0
+pygame.mixer.music.play()
+pygame.mixer.music.pause()
+# pygame.mixer.music.set_pos(position)
+# pygame.mixer.music.play(0)
+
+# clock = pygame.time.Clock()
+# clock.tick(10)
+# while pygame.mixer.music.get_busy():
+#     pygame.event.poll()
+#     clock.tick(10)
 
 # while True:
 #     msg = main_socket.recv_multipart()
 while True:
     station = raw_input("enter station: ")
-    player.play()
+    # player.play()
+    # pygame.mixer.music.set_pos(position)
+    pygame.mixer.music.unpause()
     processimage(motor_socket)
     cap.release()
     cv2.destroyAllWindows()
