@@ -11,10 +11,17 @@
 
 import zmq
 import sys
+import time
+#station = sys.argv[1]
+#print "starting line detection with station " + station
+    
+def line_detection(socket):
+    for i in range(4):
+        for i in range(4):
+            print "sleeping"
+            time.sleep(1)
+            socket.send_multipart([b'motor', str(i)])
 
-
-station = sys.argv[1]
-print "starting line detection with station " + station
     
 # Prepare our socket to talk to the motor
 context = zmq.Context()
@@ -29,23 +36,17 @@ main_socket.setsockopt(zmq.IDENTITY, b'line')
 main_socket.connect('tcp://localhost:5550')
 
 # Initialize poll set
-poller = zmq.Poller()
-poller.register(socket, zmq.POLLIN)
+#poller = zmq.Poller()
+#poller.register(socket, zmq.POLLIN)
 
 while True:
+    print "waiting for message..."
+    print main_socket.recv_multipart()
+    print "running line detection"
+    line_detection(socket)
+    print "sending a message to main"
+    main_socket.send_multipart([b"finished"])
 
-    msg = input("enter message: ")
-    print msg
-    if msg == 4:
-        exit(0)
-    
-    socket.send_multipart([b'motor', str(msg)])
-    
-    print "sleeping"
-    sockets = dict(poller.poll(1000))
-
-
-    
-   
 
 socket.close()
+main_socket.close()

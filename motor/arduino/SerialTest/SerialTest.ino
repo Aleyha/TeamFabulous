@@ -57,15 +57,15 @@ void loop()
     {
       // right
       Serial.print("turning right");
-      roboclaw.ForwardBackwardM1(address,96); //start Motor1 forward at half speed
-      roboclaw.ForwardBackwardM2(address,32); //start Motor2 backward at half speed
+      roboclaw.ForwardBackwardM1(address,30); //start Motor1 forward at half speed
+      roboclaw.ForwardBackwardM2(address, 10); //start Motor2 backward at half speed
       
     }
     else if(inByte == '3')
     {
       Serial.println("turn left");
-      roboclaw.ForwardBackwardM1(address,32);
-      roboclaw.ForwardBackwardM2(address,96);
+      roboclaw.ForwardBackwardM1(address,10);
+      roboclaw.ForwardBackwardM2(address,30);
     }
     
   }

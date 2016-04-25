@@ -5,8 +5,8 @@ import cgi, cgitb
 
 form = cgi.FieldStorage()
 
-if form.getvalue('dropdown'):
-    station = form.getvalue('dropdown')
+if form.getvalue('station'):
+    station = form.getvalue('station')
 else:
     station = "not entered"
     
@@ -14,7 +14,7 @@ print "Content-type:text/html\r\n\r\n"
 print "<!DOCTYPE html>"
 print "<html>"
 print "<head>"
-print "<title>Dropdown Box - Sixth CGI Program</title>"
+print "<title>Sending Message</title>"
 print "</head>"
 print "<body>"
 print "<p>hello you chose station %s</p>" %station
