@@ -6,6 +6,7 @@ from PIL import Image
 import threading
 import zmq
 import sys
+import pyglet
 
 global imagename 
 imagename= "rightTurn3.png"
@@ -55,12 +56,14 @@ def findRed():
     array = maskRed.tolist()
     count = (sum(x.count(255) for x in array))
     print "count is", count
-    if count >= 7000:
+    if count >= 400:
+       # motor_socket.send_multipart([b'motor', str(0))
        if findStation():
         print "station found"
-        exit()
+        player.pause()
+        return True
     else:
-        return
+        return False
 
 
 def detect_line(start_x,y):
@@ -201,6 +204,7 @@ def processimage(motor_socket):
     cap.set(4, 240)
     prevTurn = 0
 
+    
     while(True):
         ret, frame = cap.read()
         # Display the resulting frame
@@ -210,8 +214,12 @@ def processimage(motor_socket):
         cv2.imwrite('pic.png',frame)
         openimage()
 
-        findRed()
+        #look for red first
+        foundStation = findRed()
+        if foundStation:
+            return
 
+        #if red isn't found, start blue line detection
         y1=int (height-(height/4)) # Height 1 to start looking for line
        # print "y1 start "+ str(y1)
         linestarted1 = detect_line(x_start , y1)
@@ -219,8 +227,7 @@ def processimage(motor_socket):
        # print "y2 start "+ str(y2)
         linestarted2 = detect_line(x_start , y2)
        # print "linestarted1", linestarted1 , "linestarted2" , linestarted2
-        if linestarted1 > -1 and linestarted2 > -1:
-            
+        if linestarted1 > -1 and linestarted2 > -1:  
             currTurn = annotate_image(linestarted1,y1,linestarted2,y2)
             # print "currTurn = ", currTurn
             # print "prevTurn = ", prevTurn
@@ -237,8 +244,7 @@ def processimage(motor_socket):
             # print "turnCounter = ", turnCounter
         else:
             print " Line NOT found"
-    cap.release()
-    cv2.destroyAllWindows()
+    
 
 # Prepare our socket to talk to the motor
 context = zmq.Context()
@@ -250,10 +256,18 @@ motor_socket.connect('tcp://localhost:5559')
 # main_socket = context.socket(zmq.DEALER)
 # main_socket.setsockopt(zmq.IDENTITY, b'line')
 # main_socket.connect('tcp://localhost:5550')
- 
 
-		      
+song = pyglet.media.load('coldplay.wav')
+player = pyglet.media.Player()
+player.queue(song)
 
-processimage(motor_socket)
-
+# while True:
+#     msg = main_socket.recv_multipart()
+while True:
+    station = raw_input("enter station: ")
+    player.play()
+    processimage(motor_socket)
+    cap.release()
+    cv2.destroyAllWindows()
+    
 motor_socket.close()
