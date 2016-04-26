@@ -8,6 +8,7 @@ import zmq
 import sys
 import pyglet
 import pygame
+import os
 
 global position
 
@@ -26,6 +27,7 @@ global Rthreshold
 global Gthreshold
 global Bthreshold
 global im
+
 Rthreshold = 100
 Gthreshold = 50
 Bthreshold = 180
@@ -33,7 +35,7 @@ Bthreshold = 180
 global height
 global width
 global tr
-tr = Tesseract("/usr/local/share") # this is slow
+
 
 
 def tesseract(image):
@@ -47,7 +49,7 @@ def tesseract(image):
 
 def findStation():
     ret, frame = cap.read()
-    cv2.waitKey(100)
+    cv2.waitKey(1)
     imgName = "tessPic.png"
     cv2.imwrite(imgName,frame)
     tessImg = cv2.imread(imgName,1)
@@ -63,13 +65,11 @@ def findRed():
        # motor_socket.send_multipart([b'motor', str(0))
        if findStation():
         print "station found"
-        # position = pygame.mixer.music.get_pos()
-        pygame.mixer.music.pause()
+        if music:
+            player.pause()
+            found_noise.play()
         
-        # try this sometime
-        # found_noise = pygame.mixer.Sound('secret.wav')
-        # found.noise.play()
-        
+
         return True
     else:
         return False
@@ -172,18 +172,17 @@ def openimage():
 
 
 
-def annotate_image(x1,y1,x2,y2):
+def find_direction(x1,y1,x2,y2):
             global im
             # We will now draw a red cricle at the point where we have deteced a line
             # draw = ImageDraw.Draw(im)
             # # The circle will help us manually verify our algorithum
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.imwrite("drawn.jpeg", im)
-            drawnIm= cv2.imread("drawn.jpeg")
+            # cv2.imwrite("drawn.jpeg", im)
+            # drawnIm= cv2.imread("drawn.jpeg")
                        
-            cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
-            cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
-            cv2.imwrite("drawn.jpeg",drawnIm)
+            # cv2.circle(drawnIm, (x1,y1),5,(0,0,255),-1 )
+            # cv2.circle(drawnIm, (x2,y2),5,(0,0,255),-1 )
+            # cv2.imwrite("drawn.jpeg",drawnIm)
             
             # logic to see if line is turning right 
             if ( x2 >= x1 +20):
@@ -193,7 +192,6 @@ def annotate_image(x1,y1,x2,y2):
             else:
                     if ( x2 < x1 -20):
                        print "!!!!!!!!!!!!!turn left"
-                       cv2.putText(drawnIm, "turn left", (width/2, height/2),font,4,(255,255,255),2,cv2.LINE_AA )
                        return 3
                    #logic to see if line straight        
                     else:                
@@ -217,9 +215,11 @@ def processimage(motor_socket):
     while(True):
         ret, frame = cap.read()
         # Display the resulting frame
+	'''
         cv2.imshow('frame', frame)
-        if cv2.waitKey(100) & 0xFF == ord('q')  :
+        if cv2.waitKey(1) & 0xFF == ord('q')  :
             break
+	'''
         cv2.imwrite('pic.png',frame)
         openimage()
 
@@ -227,8 +227,6 @@ def processimage(motor_socket):
         foundStation = findRed()
         if foundStation:
             return
-        else:
-            pygame.mixer.music.unpause()
 
         #if red isn't found, start blue line detection
         y1=int (height-(height/4)) # Height 1 to start looking for line
@@ -239,7 +237,7 @@ def processimage(motor_socket):
         linestarted2 = detect_line(x_start , y2)
        # print "linestarted1", linestarted1 , "linestarted2" , linestarted2
         if linestarted1 > -1 and linestarted2 > -1:  
-            currTurn = annotate_image(linestarted1,y1,linestarted2,y2)
+            currTurn = find_direction(linestarted1,y1,linestarted2,y2)
             # print "currTurn = ", currTurn
             # print "prevTurn = ", prevTurn
             if currTurn == prevTurn:
@@ -255,7 +253,12 @@ def processimage(motor_socket):
             # print "turnCounter = ", turnCounter
         else:
             print " Line NOT found"
-    
+ 
+  
+global music
+music = False # if music is working  
+
+tr = Tesseract("/usr/local/share") # this is slow 
 
 # Prepare our socket to talk to the motor
 context = zmq.Context()
@@ -264,22 +267,45 @@ motor_socket.setsockopt(zmq.IDENTITY, b'line')
 motor_socket.connect('tcp://localhost:5559')
 
 # prepare socket that talks to the main program
-# main_socket = context.socket(zmq.DEALER)
-# main_socket.setsockopt(zmq.IDENTITY, b'line')
-# main_socket.connect('tcp://localhost:5550')
+main_socket = context.socket(zmq.DEALER)
+main_socket.setsockopt(zmq.IDENTITY, b'line')
+main_socket.connect('tcp://localhost:5550')
 
-# song = pyglet.media.load('onedance.wav')
-# player = pyglet.media.Player()
-# player.queue(song)
 
-pygame.mixer.init()
-# pygame.display.set_mode((200,100))
-pygame.mixer.music.load("onedance.wav")
-position= 0
-pygame.mixer.music.play()
-pygame.mixer.music.pause()
-# pygame.mixer.music.set_pos(position)
-# pygame.mixer.music.play(0)
+
+
+try:
+    # loading music files with pygame!
+    pygame.mixer.init()
+
+    # setting up the noise when it finds a station
+    global found_noise 
+    found_noise = pygame.mixer.Sound('secret.wav')
+
+    player = pyglet.media.Player()
+    
+    # looking in the music directory for music to queue
+    music_files = []
+    for files in os.listdir("/home/fart/Music"):
+        file = files.split(".")
+    # if music:
+        extension = file[1].lower() # in case file extension is uppercase
+        if extension == "wav":
+            music_files.append(files)
+
+    print music_files
+    # loading music from the music folder and queuing it up
+    for i in range(len(music_files)):
+        song = pyglet.media.load("/home/fart/Music/" + music_files[i])
+        player.queue(song)
+
+    music = True
+except:
+     print "error opening music..."
+
+
+
+
 
 # clock = pygame.time.Clock()
 # clock.tick(10)
@@ -287,15 +313,21 @@ pygame.mixer.music.pause()
 #     pygame.event.poll()
 #     clock.tick(10)
 
-# while True:
-#     msg = main_socket.recv_multipart()
 while True:
-    station = raw_input("enter station: ")
-    # player.play()
-    # pygame.mixer.music.set_pos(position)
-    pygame.mixer.music.unpause()
+    print "waiting for message..."
+    msg = main_socket.recv_multipart()
+    station = msg[0]
+    print "running line detection with station " + station
+    
+    #station = raw_input("enter station: ")
+    if music:
+    	player.play()
     processimage(motor_socket)
     cap.release()
     cv2.destroyAllWindows()
+    main_socket.send_multipart([b"finished"])
+
     
 motor_socket.close()
+main_socket.close()
+#pygame.mixer.quit()

@@ -1,10 +1,19 @@
 <?php
 //hello
 session_start();
-echo "hello";
+
 if(!isset($_SESSION['name'])){
 		header('Location:login.php');
 }
+if(isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 30)){
+	session_unset();
+	session_destroy();
+	header('refresh:1;url=login.php');
+	?>
+		<script>window.alert("SESSION TIMEOUT")</script>
+	<?php
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 // if(isset($_POST["station"])){
 // $_SESSION['in_use'] = $_POST["station"];
 // echo "is this working";

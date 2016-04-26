@@ -9,8 +9,10 @@
 '''
 
 import zmq
-import subprocess
-import os
+import pyglet
+
+song = pyglet.media.load("/home/fart/TeamFabulous/comms/R2D2a.wav")
+
 
 context = zmq.Context()
 
@@ -24,6 +26,9 @@ socket.bind('tcp://*:5550')
 # Initialize poll set
 poller = zmq.Poller()
 poller.register(socket, zmq.POLLIN)
+
+song.play()
+
 line_detection_running= False
 while True:
     print "recieving message"
@@ -33,7 +38,7 @@ while True:
     if msg[0] == "server":
         if not line_detection_running:
             socket.send_multipart([b'server', b'bet'])
-            socket.send_multipart([b'line', b'start']) 
+            socket.send_multipart([b'line', msg[1]]) 
 
             line_detection_running = True
     if msg[0] == "line":

@@ -40,9 +40,7 @@ main_socket.connect('tcp://localhost:5550')
 #poller.register(socket, zmq.POLLIN)
 
 while True:
-    print "waiting for message..."
-    print main_socket.recv_multipart()
-    print "running line detection"
+    
     line_detection(socket)
     print "sending a message to main"
     main_socket.send_multipart([b"finished"])
