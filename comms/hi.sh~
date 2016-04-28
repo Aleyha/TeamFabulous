@@ -1,0 +1,4 @@
+python line_detection.py & echo $! >> run.pid
+python ivory.py & echo $! >> run.pid
+python ebony.py & echo $! >> run.pid
+python ivory.py & echo $! >> run.pid

@@ -1,0 +1,38 @@
+import threading
+import time
+
+semaphore = threading.BoundedSemaphore()
+
+def read():
+    global semaphore
+    while (True):
+        #semaphore.acquire()
+        f = open("test.txt", "r")
+        print f.readline()
+        f.close()
+        semaphore.release()
+def write():
+    global semaphore
+    while (True):
+        semaphore.acquire()
+        print "WRITING FILE****"
+        f = open("test.txt", "w")
+        
+        f.write("Hello World!")
+        f.close()
+        semaphore.release()
+    
+
+
+thread1 = threading.Thread(target=read)
+thread2 = threading.Thread(target=write)
+
+thread1.daemon = True
+thread2.daemon = True
+
+thread1.start()
+thread2.start()
+
+while True:
+	time.sleep(1)
+

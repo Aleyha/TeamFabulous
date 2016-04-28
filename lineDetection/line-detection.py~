@@ -206,7 +206,7 @@ def find_direction(x1,y1,x2,y2):
 	xDiff = x2 - x1 # top x value - botom x value
 	yDiff = abs(y2 - y1)  # difference between top and bottom values
 	ratioYX = yDiff / float(width - 2 * neighborRange) # used to normalize ratio between width and height so that it seems like a 1:1 ratio (for easier mathing)
-	rawTurn = xDiff * ratioYX / yDiff # closer to -1 is left turn, closer to 1 is right turn
+	rawTurn = xDiff * ratioYX / xDiff # closer to -1 is left turn, closer to 1 is right turn
 	normalizedTurn = int(rawTurn * 4.5) + 5
 	
 	#comment this next block out for performance, it prints out the calculated direction
