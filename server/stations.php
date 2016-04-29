@@ -34,10 +34,10 @@ div.direction{
 </style>
 </head>
 <body>
-<meta http-equiv="refresh" content="300;" />
+<meta http-equiv="refresh" content="30;" />
 <img src="fablab_image.jpg" alt="Fab Lab UTA" style="position: fixed">
 <div class=direction>
-<form id=drct action="stations.py" method="post" target="_blank">
+<form id=drct action="stations_with_messaging.py" method="post" target="_blank">
 	Stations: 
 	<input type="text" name="station">
 	<input type="submit" value="Submit">
