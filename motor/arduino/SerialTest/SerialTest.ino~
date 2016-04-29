@@ -79,7 +79,7 @@ void loop()
 
 	if(!isDigit(inByte))
 	{
-		return;
+		continue;
 	}	
 	int command = inByte - '0';
 	int leftSignal;
@@ -95,7 +95,7 @@ void loop()
 	}
 	else
 	{
-		leftDiff = command - middleSignal;
+		leftDiff = middle - command;
 		rightDiff = -1 * leftDiff;
 		if(leftDiff < 0)
 		{
@@ -108,15 +108,6 @@ void loop()
 
 		leftSignal = neutral + ((gradientRange - rightDiff) * motorGradient);
 		rightSignal = neutral + ((gradientRange - leftDiff) * motorGradient);
-
-		roboclaw.ForwardBackwardM1(address,leftSignal);
-    roboclaw.ForwardBackwardM2(address,rightSignal);
-    //Serial.printf("M1: %s, | M2: %s", leftSignal, rightSignal);  
-    Serial.print("M1: ");
-    Serial.print(leftSignal);
-    Serial.print("  | M2: ");
-    Serial.print(rightSignal);
-    Serial.print("\n"); 
 	}
     
   }
