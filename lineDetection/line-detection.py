@@ -21,7 +21,7 @@ global prevTurn
 prevTurn = 0
 
 global station 
-# station = sys.argv[1]
+#station = sys.argv[1]
 # station = station.lower()
 global Rthreshold
 global Gthreshold
@@ -37,6 +37,9 @@ Bthreshold = 180
 global height
 global width
 global tr
+
+global tessCallCounter
+tessCallCounter = 0
 
 global saveDirectory
 saveDirectory = "/home/fart/TeamFabulous/lineDetection/"
@@ -63,18 +66,29 @@ def findStation():
 def findRed():
     array = maskRed.tolist()
     count = (sum(x.count(255) for x in array))
-    print "count is", count
-    if count >= 400:
-       # motor_socket.send_multipart([b'motor', str(0))
-       if findStation():
-        print "station found"
-        if music:
-            player.pause()
-            found_noise.play()
-        
+    print "red count is", count
+    if count >= 700:
+       motor_socket.send_multipart([b'motor', b'0'])
+       if tessCallCounter <= 5: # if we have called Tesseract under 5 times previously, call it again
+       	stationFound =  findStation()
+	tessCallCounter += 1
+	if stationFound:
+        	print "station found"
+        	if music:
+            		player.pause()
+            		found_noise.play()
+       		return True
+	else: # station not found
+		return False
+	
+       else: # tessCallCounter is greater than 5, jolt motors forward
+		tessCallCounter = 0
+		motor_socket.send_multipart([b'motor', b'5'])
+		time.sleep(1)
+		motor_socket.send_multipart([b'motor', b'0'])
+		return False
 
-        return True
-    else:
+    else: # no red found
         return False
 
 
@@ -209,9 +223,15 @@ def find_direction(x1,y1,x2,y2):
 	# returns 1 - 9, 1-4 is left, 5 is straight, 6-9 is right
 	xDiff = x2 - x1 # top x value - botom x value
 	yDiff = abs(y2 - y1)  # difference between top and bottom values
-	ratioYX = yDiff / float(width - 2 * neighborRange) # used to normalize ratio between width and height so that it seems like a 1:1 ratio (for easier mathing)
+	ratioYX = 3.0 * yDiff / float(width - 2 * neighborRange) # used to normalize ratio between width and height so that it seems like a 1:1 ratio (for easier mathing)
 	rawTurn = xDiff * ratioYX / yDiff # closer to -1 is left turn, closer to 1 is right turn
+	#print rawTurn
 	normalizedTurn = int(rawTurn * 4.5) + 5
+	if(normalizedTurn > 9):
+		normalizedTurn = 9
+	elif(normalizedTurn < 1):
+		normalizedTurn = 1
+
 	
 	#comment this next block out for performance, it prints out the calculated direction
 	turnAdjective = {0: "", 1: "slight", 2: "medium", 3: "heavy", 4: "max"}
@@ -241,13 +261,14 @@ def processimage(motor_socket):
     cap.set(3, 320)
     cap.set(4, 240)
     prevTurn = 0
-
+    global direction
+    direction = 0
     
     while(True):
         ret, frame = cap.read()
         # Display the resulting frame
 	
-        cv2.imshow('frame', frame)
+        #cv2.imshow('frame', frame)
         if cv2.waitKey(1) & 0xFF == ord('q')  :
             break
         
@@ -270,25 +291,29 @@ def processimage(motor_socket):
        # print "linestarted1", linestarted1 , "linestarted2" , linestarted2
         if linestarted1 > -1 and linestarted2 > -1:  
             currTurn = find_direction(linestarted1,y1,linestarted2,y2)
-            motor_socket.send_multipart([b'motor', str(currTurn)])
-            '''
-            # print "currTurn = ", currTurn
-            # print "prevTurn = ", prevTurn
+            #motor_socket.send_multipart([b'motor', str(currTurn)])
+            
+            print "currTurn = ", currTurn
+            print "prevTurn = ", prevTurn
             if currTurn == prevTurn:
                 turnCounter += 1
             else:
                 prevTurn = currTurn
                 turnCounter = 1
-            if turnCounter == 5:
+            if turnCounter == 2 and currTurn != direction:
                 # send turn to motors
                 print "sending to motors"
+                direction = currTurn
                 motor_socket.send_multipart([b'motor', str(currTurn)])
                 turnCounter = 0
             # print "turnCounter = ", turnCounter
-            '''
+            
             
         else:
-            print " Line NOT found"
+            print "Line NOT found"
+            prevTurn = 0
+            direction = 0
+            motor_socket.send_multipart([b'motor', b'c'])
  
 
 
@@ -360,6 +385,7 @@ try:
         print "waiting for message..."
         msg = main_socket.recv_multipart()
         station = msg[0]
+        
         print "running line detection with station " + station
 
         if music:
@@ -368,7 +394,7 @@ try:
         cap.release()
         cv2.destroyAllWindows()
         main_socket.send_multipart([b"finished"])
-
+        motor_socket.send_multipart([b'motor', b'0'])
         
     motor_socket.close()
     main_socket.close()
