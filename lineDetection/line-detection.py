@@ -190,7 +190,7 @@ def openimage():
 
 def find_direction(x1,y1,x2,y2):
 	global im
-    global right
+        global right
 	'''
 	We will now draw a red cricle at the point where we have deteced a line
 	draw = ImageDraw.Draw(im)
