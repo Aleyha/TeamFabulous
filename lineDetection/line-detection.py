@@ -43,7 +43,6 @@ tessCallCounter = 0
 
 global saveDirectory
 saveDirectory = "/home/fart/TeamFabulous/lineDetection/"
-
 def tesseract(image):
     text = tr.ocr_image(image)
     #print text
@@ -68,26 +67,25 @@ def findRed():
     count = (sum(x.count(255) for x in array))
     print "red count is", count
     if count >= 700:
-       motor_socket.send_multipart([b'motor', b'0'])
-       if tessCallCounter <= 5: # if we have called Tesseract under 5 times previously, call it again
-       	stationFound =  findStation()
-	tessCallCounter += 1
-	if stationFound:
-        	print "station found"
-        	if music:
-            		player.pause()
-            		found_noise.play()
-       		return True
-	else: # station not found
-		return False
-	
-       else: # tessCallCounter is greater than 5, jolt motors forward
-		tessCallCounter = 0
-		motor_socket.send_multipart([b'motor', b'5'])
-		time.sleep(1)
-		motor_socket.send_multipart([b'motor', b'0'])
-		return False
+        motor_socket.send_multipart([b'motor', b'0'])
+        if tessCallCounter <= 3: # if we have called Tesseract under 5 times previously, call it again
+            stationFound =  findStation()
+            tessCallCounter += 1
+            if stationFound:
+                print "station found"
+                if music:
+                    player.pause()
+                    found_noise.play()
+                return True
+            else: # station not found
+                return False
 
+        else: # tessCallCounter is greater than 5, jolt motors forward
+            tessCallCounter = 0
+            motor_socket.send_multipart([b'motor', b'5'])
+            time.sleep(1)
+            motor_socket.send_multipart([b'motor', b'0'])
+            return False
     else: # no red found
         return False
 
