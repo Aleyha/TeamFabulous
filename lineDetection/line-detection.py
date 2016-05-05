@@ -38,9 +38,6 @@ global height
 global width
 global tr
 
-global tessCallCounter
-tessCallCounter = 0
-
 global saveDirectory
 saveDirectory = "/home/fart/TeamFabulous/lineDetection/"
 def tesseract(image):
@@ -63,10 +60,11 @@ def findStation():
     return stationFound
 
 def findRed():
+    global tessCallCounter
     array = maskRed.tolist()
     count = (sum(x.count(255) for x in array))
     print "red count is", count
-    if count >= 700:
+    if count >= 2000:
         motor_socket.send_multipart([b'motor', b'0'])
         if tessCallCounter <= 3: # if we have called Tesseract under 5 times previously, call it again
             stationFound =  findStation()
@@ -261,6 +259,8 @@ def processimage(motor_socket):
     prevTurn = 0
     global direction
     direction = 0
+    global tessCallCounter
+    tessCallCounter = 0
     
     while(True):
         ret, frame = cap.read()
@@ -311,7 +311,7 @@ def processimage(motor_socket):
             print "Line NOT found"
             prevTurn = 0
             direction = 0
-            motor_socket.send_multipart([b'motor', b'c'])
+            motor_socket.send_multipart([b'motor', b'0'])
  
 
 

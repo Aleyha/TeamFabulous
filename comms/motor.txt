@@ -1,8 +1,4 @@
 Traceback (most recent call last):
-  File "/home/fart/TeamFabulous/comms/motor.py", line 20, in <module>
-    ser = serial.Serial('/dev/ttyACM0', 9600) # Establish the connection on a specific port
-  File "/usr/lib/python2.7/dist-packages/serial/serialutil.py", line 261, in __init__
-    self.open()
-  File "/usr/lib/python2.7/dist-packages/serial/serialposix.py", line 278, in open
-    raise SerialException("could not open port %s: %s" % (self._port, msg))
-SerialException: could not open port /dev/ttyACM0: [Errno 16] Device or resource busy: '/dev/ttyACM0'
+  File "stop.py", line 18, in <module>
+    print messageser.write("0") # Convert the decimal number to ASCII then send it to the Arduino
+NameError: name 'messageser' is not defined
