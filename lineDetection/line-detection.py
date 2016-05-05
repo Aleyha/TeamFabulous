@@ -39,7 +39,10 @@ global width
 global tr
 
 global right
-right = False
+right = True
+
+global lnfCounter
+lnfCounter = 0
 
 global saveDirectory
 saveDirectory = "/home/fart/TeamFabulous/lineDetection/"
@@ -265,7 +268,9 @@ def processimage(motor_socket):
     direction = 0
     global tessCallCounter
     tessCallCounter = 0
-    
+    global right   
+    global lnfCounter
+
     while(True):
         ret, frame = cap.read()
         # Display the resulting frame
@@ -292,7 +297,8 @@ def processimage(motor_socket):
         linestarted2 = detect_line(x_start , y2)
        # print "linestarted1", linestarted1 , "linestarted2" , linestarted2
         if linestarted1 > -1 and linestarted2 > -1:  
-            currTurn = find_direction(linestarted1,y1,linestarted2,y2)
+            lnfCounter = 0
+	    currTurn = find_direction(linestarted1,y1,linestarted2,y2)
             #motor_socket.send_multipart([b'motor', str(currTurn)])
             
             print "currTurn = ", currTurn
@@ -310,8 +316,8 @@ def processimage(motor_socket):
                     right = False
                 if direction > 5 and direction < 10:
                     right = True
-                if direction == 5:
-                    right = True
+                #if direction == 5:
+                #   right = True
                 motor_socket.send_multipart([b'motor', str(currTurn)])
                 turnCounter = 0
             # print "turnCounter = ", turnCounter
@@ -319,13 +325,15 @@ def processimage(motor_socket):
             
         else:
             print "Line NOT found"
-            prevTurn = 0
-            direction = 0
-            if right:
-                motor_socket.send_multipart([b'motor', b'b'])
-            else:
-                motor_socket.send_multipart([b'motor',b'c'])    
-            motor_socket.send_multipart([b'motor', b'0'])
+	    lnfCounter += 1
+	    if lnfCounter > 5:
+            	prevTurn = 0
+            	direction = 0
+            	if right:
+                	motor_socket.send_multipart([b'motor', b'c'])#spin left
+            	else:
+                	motor_socket.send_multipart([b'motor',b'b'])#spin right
+           # motor_socket.send_multipart([b'motor', b'0'])
  
 
 
