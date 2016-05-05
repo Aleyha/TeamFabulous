@@ -38,6 +38,9 @@ global height
 global width
 global tr
 
+global right
+right = False
+
 global saveDirectory
 saveDirectory = "/home/fart/TeamFabulous/lineDetection/"
 def tesseract(image):
@@ -187,6 +190,7 @@ def openimage():
 
 def find_direction(x1,y1,x2,y2):
 	global im
+    global right
 	'''
 	We will now draw a red cricle at the point where we have deteced a line
 	draw = ImageDraw.Draw(im)
@@ -302,6 +306,12 @@ def processimage(motor_socket):
                 # send turn to motors
                 print "sending to motors"
                 direction = currTurn
+                if direction > 1 and direction < 5:
+                    right = False
+                if direction > 5 and direction < 10:
+                    right = True
+                if direction == 5:
+                    right = True
                 motor_socket.send_multipart([b'motor', str(currTurn)])
                 turnCounter = 0
             # print "turnCounter = ", turnCounter
@@ -311,6 +321,10 @@ def processimage(motor_socket):
             print "Line NOT found"
             prevTurn = 0
             direction = 0
+            if right:
+                motor_socket.send_multipart([b'motor', b'b'])
+            else:
+                motor_socket.send_multipart([b'motor',b'c'])    
             motor_socket.send_multipart([b'motor', b'0'])
  
 
